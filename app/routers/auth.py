@@ -5,10 +5,10 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.security import hash_password
+from app.core.security import hash_password, verify_password, create_access_token
 from app.db.dependencies import get_db
-from app.models.user import User, UserGroup, UserGroupEnum, ActivationToken
-from app.schemas.auth import RegistrationModel, ActivationTokenModel, ResendActivationTokenModel
+from app.models.user import User, UserGroup, UserGroupEnum, ActivationToken, RefreshToken
+from app.schemas.auth import RegistrationModel, ActivationTokenModel, ResendActivationTokenModel, LoginModel
 
 router = APIRouter()
 
@@ -109,3 +109,31 @@ async def resend_activation(data: ResendActivationTokenModel, db: AsyncSession =
     await db.commit()
 
     return {"message": f"new token: {new_activation_token.token}"}
+
+
+@router.post("/auth/login", status_code=200)
+async def login(data: LoginModel, db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(User).where(User.email == data.email))
+
+    user = result.scalar_one_or_none()
+
+    if user is None:
+        raise HTTPException(status_code=404, detail="User does not exist")
+
+    if not user.is_active:
+        raise HTTPException(status_code=400, detail="User is not active")
+
+    if not verify_password(data.password, user.hashed_password):
+        raise HTTPException(status_code=400, detail="Incorrect password")
+
+    access_token = create_access_token(data={"sub": user.id})
+    refresh_token = RefreshToken(
+        token=secrets.token_urlsafe(32),
+        user_id=user.id,
+        expires_at=datetime.now(timezone.utc) + timedelta(hours=24),
+    )
+
+    db.add(refresh_token)
+    await db.commit()
+
+    return {"access_token": access_token, "refresh_token": refresh_token.token}
