@@ -35,3 +35,7 @@ class ActivationTokenModel(BaseModel):
 
 class ResendActivationTokenModel(BaseModel):
     email: EmailStr
+
+
+class LoginModel(BasePasswordModel):
+    email: EmailStr
