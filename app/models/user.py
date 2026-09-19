@@ -1,4 +1,4 @@
-from datetime import datetime, date
+from datetime import datetime, date, timezone
 from enum import Enum
 from typing import List, Optional
 
@@ -11,6 +11,12 @@ from app.db.session import Base
 class GenderEnum(str, Enum):
     MAN = "MAN"
     WOMAN = "WOMAN"
+
+
+class UserGroupEnum(str, Enum):
+    USER = "USER"
+    MODERATOR = "MODERATOR"
+    ADMIN = "ADMIN"
 
 
 class UserGroup(Base):
@@ -31,12 +37,12 @@ class User(Base):
     is_active: Mapped[bool] = mapped_column(default=False)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
-        default=datetime.now
+        default=lambda: datetime.now(timezone.utc)
     )
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
-        default=datetime.now,
-        onupdate=datetime.now
+        default=lambda: datetime.now(timezone.utc),
+        onupdate=lambda: datetime.now(timezone.utc)
     )
     group_id: Mapped[int] = mapped_column(ForeignKey("user_groups.id"))
 
@@ -83,7 +89,9 @@ class ActivationToken(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), unique=True)
     token: Mapped[str] = mapped_column(unique=True)
-    expires_at: Mapped[datetime] = mapped_column()
+    expires_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True)
+    )
 
     user: Mapped[User] = relationship(
         "User",
@@ -97,7 +105,9 @@ class PasswordResetToken(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), unique=True)
     token: Mapped[str] = mapped_column(unique=True)
-    expires_at: Mapped[datetime] = mapped_column()
+    expires_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True)
+    )
 
     user: Mapped[User] = relationship(
         "User",
@@ -111,6 +121,8 @@ class RefreshToken(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
     token: Mapped[str] = mapped_column(unique=True)
-    expires_at: Mapped[datetime] = mapped_column()
+    expires_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True)
+    )
 
     user: Mapped[User] = relationship("User", back_populates="refresh_tokens")
