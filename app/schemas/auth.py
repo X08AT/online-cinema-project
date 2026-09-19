@@ -43,3 +43,7 @@ class LoginModel(BasePasswordModel):
 
 class TokenRefreshModel(BaseModel):
     refresh_token: str
+
+
+class LogoutModel(BaseModel):
+    refresh_token: str
