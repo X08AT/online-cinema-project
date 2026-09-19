@@ -9,7 +9,7 @@ from app.core.security import hash_password, verify_password, create_access_toke
 from app.db.dependencies import get_db
 from app.models.user import User, UserGroup, UserGroupEnum, ActivationToken, RefreshToken
 from app.schemas.auth import RegistrationModel, ActivationTokenModel, ResendActivationTokenModel, LoginModel, \
-    TokenRefreshModel
+    TokenRefreshModel, LogoutModel
 
 router = APIRouter()
 
@@ -155,3 +155,18 @@ async def refresh_token(data: TokenRefreshModel, db: AsyncSession = Depends(get_
     new_access_token = create_access_token(data={"sub": refresh_token.user_id})
 
     return {"access_token": new_access_token}
+
+
+@router.post("/auth/logout", status_code=200)
+async def logout(data: LogoutModel, db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(RefreshToken).where(RefreshToken.token == data.refresh_token))
+
+    refresh_token = result.scalar_one_or_none()
+
+    if refresh_token is None:
+        raise HTTPException(status_code=404, detail="Refresh token does not exist")
+
+    await db.delete(refresh_token)
+    await db.commit()
+
+    return {"message": "You have been logged out"}
