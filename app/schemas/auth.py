@@ -31,3 +31,7 @@ class RegistrationModel(BasePasswordModel):
 
 class ActivationTokenModel(BaseModel):
     token: str
+
+
+class ResendActivationTokenModel(BaseModel):
+    email: EmailStr
