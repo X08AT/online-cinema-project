@@ -81,3 +81,31 @@ async def activate(data: ActivationTokenModel, db: AsyncSession = Depends(get_db
     await db.commit()
 
     return {"message": "Account activated"}
+
+
+@router.post("/auth/resend-activation", status_code=200)
+async def resend_activation(data: ResendActivationTokenModel, db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(User).where(User.email == data.email))
+
+    user = result.scalar_one_or_none()
+
+    if user is None:
+        raise HTTPException(status_code=404, detail="User does not exist")
+
+    if user.is_active:
+        raise HTTPException(status_code=400, detail="User already active")
+
+    if user.activation_token:
+        await db.delete(user.activation_token)
+        await db.flush()
+
+    new_activation_token = ActivationToken(
+        token=secrets.token_urlsafe(32),
+        user_id=user.id,
+        expires_at=datetime.now(timezone.utc) + timedelta(hours=24),
+    )
+
+    db.add(new_activation_token)
+    await db.commit()
+
+    return {"message": f"new token: {new_activation_token.token}"}
