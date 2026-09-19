@@ -39,3 +39,7 @@ class ResendActivationTokenModel(BaseModel):
 
 class LoginModel(BasePasswordModel):
     email: EmailStr
+
+
+class TokenRefreshModel(BaseModel):
+    refresh_token: str
