@@ -7,7 +7,7 @@ class BasePasswordModel(BaseModel):
     @field_validator("password")
     @classmethod
     def validate_password(cls, value: str) -> str:
-        if len (value) < 8:
+        if len(value) < 8:
             raise ValueError("Password must be at least 8 characters long")
 
         if len(value) > 16:
@@ -27,3 +27,7 @@ class BasePasswordModel(BaseModel):
 
 class RegistrationModel(BasePasswordModel):
     email: EmailStr
+
+
+class ActivationTokenModel(BaseModel):
+    token: str
