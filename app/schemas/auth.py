@@ -10,6 +10,9 @@ class BasePasswordModel(BaseModel):
         if len (value) < 8:
             raise ValueError("Password must be at least 8 characters long")
 
+        if len(value) > 16:
+            raise ValueError("Password must be at most 16 characters long")
+
         if not any(char.isupper() for char in value):
             raise ValueError("Password must contain at least one uppercase character")
 
