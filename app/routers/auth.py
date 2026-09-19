@@ -8,7 +8,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.security import hash_password, verify_password, create_access_token
 from app.db.dependencies import get_db
 from app.models.user import User, UserGroup, UserGroupEnum, ActivationToken, RefreshToken
-from app.schemas.auth import RegistrationModel, ActivationTokenModel, ResendActivationTokenModel, LoginModel
+from app.schemas.auth import RegistrationModel, ActivationTokenModel, ResendActivationTokenModel, LoginModel, \
+    TokenRefreshModel
 
 router = APIRouter()
 
@@ -137,3 +138,20 @@ async def login(data: LoginModel, db: AsyncSession = Depends(get_db)):
     await db.commit()
 
     return {"access_token": access_token, "refresh_token": refresh_token.token}
+
+
+@router.post("/auth/refresh", status_code=200)
+async def refresh_token(data: TokenRefreshModel, db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(RefreshToken).where(RefreshToken.token == data.refresh_token))
+
+    refresh_token = result.scalar_one_or_none()
+
+    if refresh_token is None:
+        raise HTTPException(status_code=404, detail="Refresh token does not exist")
+
+    if refresh_token.expires_at < datetime.now(timezone.utc):
+        raise HTTPException(status_code=400, detail="Refresh token expired")
+
+    new_access_token = create_access_token(data={"sub": refresh_token.user_id})
+
+    return {"access_token": new_access_token}
