@@ -1,4 +1,4 @@
-from app.celery.celery_app import celery_app
+from app.worker.celery_app import celery_app
 
 
 @celery_app.task

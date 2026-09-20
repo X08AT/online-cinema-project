@@ -1,9 +1,10 @@
-import os
-
 from celery import Celery
+
+from app.core.settings import settings
+
 
 celery_app = Celery(
     "online_cinema",
-    broker=os.getenv("REDIS_URL", "redis://redis:6379"),
-    backend=os.getenv("REDIS_URL", "redis://redis:6379"),
+    broker=settings.REDIS_URL,
+    backend=settings.REDIS_URL,
 )

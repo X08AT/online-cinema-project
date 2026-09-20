@@ -5,7 +5,6 @@ from pwdlib import PasswordHash
 
 from app.core.settings import settings
 
-ALGORITHM = "HS256"
 
 password_hash = PasswordHash.recommended()
 
@@ -25,4 +24,4 @@ def create_access_token(data: dict) -> str:
 
     to_encode.update({"exp": expire})
 
-    return jwt.encode(to_encode, settings.SECRET_KEY, algorithm=ALGORITHM)
+    return jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
