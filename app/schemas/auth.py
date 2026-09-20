@@ -51,3 +51,7 @@ class LogoutModel(BaseModel):
 
 class ChangePasswordModel(BasePasswordModel):
     old_password: str
+
+
+class ResetPasswordRequestModel(BaseModel):
+    email: EmailStr
