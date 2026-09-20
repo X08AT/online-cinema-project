@@ -33,10 +33,6 @@ class RegistrationModel(BasePasswordModel):
     email: EmailStr
 
 
-class ActivationTokenModel(BaseModel):
-    token: str
-
-
 class ResendActivationTokenModel(BaseModel):
     email: EmailStr
 
@@ -62,5 +58,4 @@ class ResetPasswordRequestModel(BaseModel):
 
 
 class ResetPasswordModel(BaseModel):
-    token: str
     new_password: str
