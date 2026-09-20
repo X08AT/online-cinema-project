@@ -7,9 +7,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.security import hash_password, verify_password, create_access_token
 from app.db.dependencies import get_db, get_current_user
-from app.models.user import User, UserGroup, UserGroupEnum, ActivationToken, RefreshToken
+from app.models.user import User, UserGroup, UserGroupEnum, ActivationToken, RefreshToken, PasswordResetToken
 from app.schemas.auth import RegistrationModel, ActivationTokenModel, ResendActivationTokenModel, LoginModel, \
-    TokenRefreshModel, LogoutModel, ChangePasswordModel
+    TokenRefreshModel, LogoutModel, ChangePasswordModel, ResetPasswordRequestModel
 
 router = APIRouter()
 
@@ -184,3 +184,31 @@ async def change_password(data: ChangePasswordModel, current_user: User = Depend
     await db.commit()
 
     return {"message": "Password changed"}
+
+
+
+@router.post("/auth/password-reset/request", status_code=200)
+async def password_reset_request(data: ResetPasswordRequestModel, db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(User).where(User.email == data.email))
+
+    user = result.scalar_one_or_none()
+
+    if user is None:
+        raise HTTPException(status_code=404, detail="User does not exist")
+
+    if not user.is_active:
+        raise HTTPException(status_code=400, detail="User is not active")
+
+    if user.password_reset_token:
+        await db.delete(user.password_reset_token)
+        await db.flush()
+
+    new_password_reset_token = PasswordResetToken(
+        token=secrets.token_urlsafe(32),
+        user_id=user.id,
+        expires_at=datetime.now(timezone.utc) + timedelta(hours=24),
+    )
+
+    db.add(new_password_reset_token)
+    await db.commit()
+    return {"message": f"Password reset token: {new_password_reset_token.token}"}
