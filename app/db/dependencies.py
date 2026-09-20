@@ -18,11 +18,15 @@ async def get_db() -> AsyncGenerator[AsyncSession, None]:
         yield session
 
 
-async def get_current_user(credentials = Depends(security), db: AsyncSession = Depends(get_db)):
+async def get_current_user(
+    credentials=Depends(security), db: AsyncSession = Depends(get_db)
+):
     token = credentials.credentials
 
     try:
-        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+        payload = jwt.decode(
+            token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM]
+        )
     except JWTError:
         raise HTTPException(status_code=401, detail="Invalid access token")
 

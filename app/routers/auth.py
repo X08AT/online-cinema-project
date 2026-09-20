@@ -5,16 +5,40 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.security import hash_password, verify_password, create_access_token
+from app.core.security import (
+    hash_password,
+    verify_password,
+    create_access_token
+)
 from app.db.dependencies import get_db, get_current_user
-from app.models.user import User, UserGroup, UserGroupEnum, ActivationToken, RefreshToken, PasswordResetToken
-from app.schemas.auth import RegistrationModel, ActivationTokenModel, ResendActivationTokenModel, LoginModel, \
-    TokenRefreshModel, LogoutModel, ChangePasswordModel, ResetPasswordRequestModel
+from app.models.user import (
+    User,
+    UserGroup,
+    UserGroupEnum,
+    ActivationToken,
+    RefreshToken,
+    PasswordResetToken,
+)
+from app.schemas.auth import (
+    RegistrationModel,
+    ActivationTokenModel,
+    ResendActivationTokenModel,
+    LoginModel,
+    TokenRefreshModel,
+    LogoutModel,
+    ChangePasswordModel,
+    ResetPasswordRequestModel,
+    ResetPasswordModel,
+)
 
 router = APIRouter()
 
+
 @router.post("/auth/register", status_code=201)
-async def register(data: RegistrationModel, db: AsyncSession = Depends(get_db)):
+async def register(
+        data: RegistrationModel,
+        db: AsyncSession = Depends(get_db)
+):
     result = await db.execute(select(User).where(User.email == data.email))
 
     user = result.scalar_one_or_none()
@@ -22,7 +46,9 @@ async def register(data: RegistrationModel, db: AsyncSession = Depends(get_db)):
     if user is not None:
         raise HTTPException(status_code=400, detail="Email already registered")
 
-    result = await db.execute(select(UserGroup).where(UserGroup.name == UserGroupEnum.USER.value))
+    result = await db.execute(
+        select(UserGroup).where(UserGroup.name == UserGroupEnum.USER.value)
+    )
 
     group = result.scalar_one_or_none()
 
@@ -58,8 +84,13 @@ async def register(data: RegistrationModel, db: AsyncSession = Depends(get_db)):
 
 
 @router.post("/auth/activate", status_code=200)
-async def activate(data: ActivationTokenModel, db: AsyncSession = Depends(get_db)):
-    result = await db.execute(select(ActivationToken).where(ActivationToken.token == data.token))
+async def activate(
+        data: ActivationTokenModel,
+        db: AsyncSession = Depends(get_db)
+):
+    result = await db.execute(
+        select(ActivationToken).where(ActivationToken.token == data.token)
+    )
 
     token = result.scalar_one_or_none()
 
@@ -85,7 +116,9 @@ async def activate(data: ActivationTokenModel, db: AsyncSession = Depends(get_db
 
 
 @router.post("/auth/resend-activation", status_code=200)
-async def resend_activation(data: ResendActivationTokenModel, db: AsyncSession = Depends(get_db)):
+async def resend_activation(
+    data: ResendActivationTokenModel, db: AsyncSession = Depends(get_db)
+):
     result = await db.execute(select(User).where(User.email == data.email))
 
     user = result.scalar_one_or_none()
@@ -141,13 +174,21 @@ async def login(data: LoginModel, db: AsyncSession = Depends(get_db)):
 
 
 @router.post("/auth/refresh", status_code=200)
-async def refresh_token(data: TokenRefreshModel, db: AsyncSession = Depends(get_db)):
-    result = await db.execute(select(RefreshToken).where(RefreshToken.token == data.refresh_token))
+async def refresh_token(
+        data: TokenRefreshModel,
+        db: AsyncSession = Depends(get_db)
+):
+    result = await db.execute(
+        select(RefreshToken).where(RefreshToken.token == data.refresh_token)
+    )
 
     refresh_token = result.scalar_one_or_none()
 
     if refresh_token is None:
-        raise HTTPException(status_code=404, detail="Refresh token does not exist")
+        raise HTTPException(
+            status_code=404,
+            detail="Refresh token does not exist"
+        )
 
     if refresh_token.expires_at < datetime.now(timezone.utc):
         raise HTTPException(status_code=400, detail="Refresh token expired")
@@ -159,12 +200,17 @@ async def refresh_token(data: TokenRefreshModel, db: AsyncSession = Depends(get_
 
 @router.post("/auth/logout", status_code=200)
 async def logout(data: LogoutModel, db: AsyncSession = Depends(get_db)):
-    result = await db.execute(select(RefreshToken).where(RefreshToken.token == data.refresh_token))
+    result = await db.execute(
+        select(RefreshToken).where(RefreshToken.token == data.refresh_token)
+    )
 
     refresh_token = result.scalar_one_or_none()
 
     if refresh_token is None:
-        raise HTTPException(status_code=404, detail="Refresh token does not exist")
+        raise HTTPException(
+            status_code=404,
+            detail="Refresh token does not exist"
+        )
 
     await db.delete(refresh_token)
     await db.commit()
@@ -173,7 +219,11 @@ async def logout(data: LogoutModel, db: AsyncSession = Depends(get_db)):
 
 
 @router.post("/auth/change-password", status_code=200)
-async def change_password(data: ChangePasswordModel, current_user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
+async def change_password(
+    data: ChangePasswordModel,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
     if not verify_password(data.old_password, current_user.hashed_password):
         raise HTTPException(status_code=400, detail="Incorrect password")
 
@@ -186,9 +236,10 @@ async def change_password(data: ChangePasswordModel, current_user: User = Depend
     return {"message": "Password changed"}
 
 
-
 @router.post("/auth/password-reset/request", status_code=200)
-async def password_reset_request(data: ResetPasswordRequestModel, db: AsyncSession = Depends(get_db)):
+async def password_reset_request(
+    data: ResetPasswordRequestModel, db: AsyncSession = Depends(get_db)
+):
     result = await db.execute(select(User).where(User.email == data.email))
 
     user = result.scalar_one_or_none()
@@ -211,4 +262,48 @@ async def password_reset_request(data: ResetPasswordRequestModel, db: AsyncSessi
 
     db.add(new_password_reset_token)
     await db.commit()
-    return {"message": f"Password reset token: {new_password_reset_token.token}"}
+    return {
+        "message": f"Password reset token: {new_password_reset_token.token}"
+    }
+
+
+@router.post("/auth/password-reset/confirm", status_code=200)
+async def password_reset(
+        data: ResetPasswordModel,
+        db: AsyncSession = Depends(get_db)
+):
+    result = await db.execute(
+        select(PasswordResetToken)
+        .where(PasswordResetToken.token == data.token)
+    )
+
+    token = result.scalar_one_or_none()
+
+    if token is None:
+        raise HTTPException(
+            status_code=404, detail="Password reset token does not exist"
+        )
+
+    if token.expires_at < datetime.now(timezone.utc):
+        raise HTTPException(
+            status_code=400,
+            detail="Password reset token expired"
+        )
+
+    result = await db.execute(select(User).where(User.id == token.user_id))
+
+    user = result.scalar_one_or_none()
+
+    if user is None:
+        raise HTTPException(status_code=404, detail="User does not exist")
+
+    if not user.is_active:
+        raise HTTPException(status_code=400, detail="User is not active")
+
+    new_hashed_password = hash_password(data.new_password)
+
+    user.hashed_password = new_hashed_password
+    await db.delete(token)
+    await db.commit()
+
+    return {"message": "Password reset successfully"}
