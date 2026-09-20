@@ -14,10 +14,14 @@ class BasePasswordModel(BaseModel):
             raise ValueError("Password must be at most 16 characters long")
 
         if not any(char.isupper() for char in value):
-            raise ValueError("Password must contain at least one uppercase character")
+            raise ValueError(
+                "Password must contain at least one uppercase character"
+            )
 
         if not any(char.islower() for char in value):
-            raise ValueError("Password must contain at least one lowercase character")
+            raise ValueError(
+                "Password must contain at least one lowercase character"
+            )
 
         if not any(char.isdigit() for char in value):
             raise ValueError("Password must contain at least one digit")
@@ -55,3 +59,8 @@ class ChangePasswordModel(BasePasswordModel):
 
 class ResetPasswordRequestModel(BaseModel):
     email: EmailStr
+
+
+class ResetPasswordModel(BaseModel):
+    token: str
+    new_password: str
