@@ -47,3 +47,7 @@ class TokenRefreshModel(BaseModel):
 
 class LogoutModel(BaseModel):
     refresh_token: str
+
+
+class ChangePasswordModel(BasePasswordModel):
+    old_password: str
