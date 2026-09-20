@@ -30,6 +30,7 @@ from app.schemas.auth import (
     ResetPasswordRequestModel,
     ResetPasswordModel,
 )
+from app.services.email_service import send_email
 
 router = APIRouter()
 
@@ -75,6 +76,12 @@ async def register(
 
     db.add(activation_token)
     await db.commit()
+
+    send_email(
+        user.email,
+        "User registered successfully",
+        f"activation_token: {activation_token.token}"
+    )
 
     return {
         "message": "User registered successfully",
