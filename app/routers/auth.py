@@ -21,7 +21,6 @@ from app.models.user import (
 )
 from app.schemas.auth import (
     RegistrationModel,
-    ActivationTokenModel,
     ResendActivationTokenModel,
     LoginModel,
     TokenRefreshModel,
@@ -77,37 +76,49 @@ async def register(
     db.add(activation_token)
     await db.commit()
 
+    activation_link = (
+        f"http://localhost:8000/auth/activate"
+        f"?token={activation_token.token}"
+    )
+
+    email_body = (
+        "Hello!\n\n"
+        "Your account has been successfully registered.\n\n"
+        "Please activate your account using the link below:\n"
+        f"{activation_link}\n\n"
+        "This link is valid for 24 hours."
+    )
+
     send_email(
         user.email,
-        "User registered successfully",
-        f"activation_token: {activation_token.token}"
+        "Activate your Online Cinema account",
+        email_body
     )
 
     return {
-        "message": "User registered successfully",
-        "user_id": user.id,
-        "activation_token": activation_token.token,
+        "message": "Registration successful."
+                   " Check your email to activate your account."
     }
 
 
-@router.post("/auth/activate", status_code=200)
+@router.get("/auth/activate", status_code=200)
 async def activate(
-        data: ActivationTokenModel,
+        token: str,
         db: AsyncSession = Depends(get_db)
 ):
     result = await db.execute(
-        select(ActivationToken).where(ActivationToken.token == data.token)
+        select(ActivationToken).where(ActivationToken.token == token)
     )
 
-    token = result.scalar_one_or_none()
+    token_obj = result.scalar_one_or_none()
 
-    if token is None:
+    if token_obj is None:
         raise HTTPException(status_code=404, detail="Token does not exist")
 
-    if token.expires_at < datetime.now(timezone.utc):
+    if token_obj.expires_at < datetime.now(timezone.utc):
         raise HTTPException(status_code=404, detail="Token expired")
 
-    result = await db.execute(select(User).where(User.id == token.user_id))
+    result = await db.execute(select(User).where(User.id == token_obj.user_id))
 
     user = result.scalar_one_or_none()
 
@@ -116,7 +127,7 @@ async def activate(
 
     user.is_active = True
 
-    await db.delete(token)
+    await db.delete(token_obj)
     await db.commit()
 
     return {"message": "Account activated"}
@@ -124,20 +135,37 @@ async def activate(
 
 @router.post("/auth/resend-activation", status_code=200)
 async def resend_activation(
-    data: ResendActivationTokenModel, db: AsyncSession = Depends(get_db)
+    data: ResendActivationTokenModel,
+    db: AsyncSession = Depends(get_db)
 ):
-    result = await db.execute(select(User).where(User.email == data.email))
+    result = await db.execute(
+        select(User).where(User.email == data.email)
+    )
 
     user = result.scalar_one_or_none()
 
     if user is None:
-        raise HTTPException(status_code=404, detail="User does not exist")
+        raise HTTPException(
+            status_code=404,
+            detail="User does not exist"
+        )
 
     if user.is_active:
-        raise HTTPException(status_code=400, detail="User already active")
+        raise HTTPException(
+            status_code=400,
+            detail="User already active"
+        )
 
-    if user.activation_token:
-        await db.delete(user.activation_token)
+    result = await db.execute(
+        select(ActivationToken).where(
+            ActivationToken.user_id == user.id
+        )
+    )
+
+    old_activation_token = result.scalar_one_or_none()
+
+    if old_activation_token:
+        await db.delete(old_activation_token)
         await db.flush()
 
     new_activation_token = ActivationToken(
@@ -149,7 +177,25 @@ async def resend_activation(
     db.add(new_activation_token)
     await db.commit()
 
-    return {"message": f"new token: {new_activation_token.token}"}
+    activation_link = (
+        f"http://localhost:8000/auth/activate"
+        f"?token={new_activation_token.token}"
+    )
+
+    email_body = (
+        "Hello!\n\n"
+        "Here is your new activation link:\n"
+        f"{activation_link}\n\n"
+        "This link is valid for 24 hours."
+    )
+
+    send_email(
+        user.email,
+        "New activation link",
+        email_body
+    )
+
+    return {"message": "Activation email sent"}
 
 
 @router.post("/auth/login", status_code=200)
@@ -257,8 +303,15 @@ async def password_reset_request(
     if not user.is_active:
         raise HTTPException(status_code=400, detail="User is not active")
 
-    if user.password_reset_token:
-        await db.delete(user.password_reset_token)
+    result = await db.execute(
+        select(PasswordResetToken).where(
+            PasswordResetToken.user_id == user.id
+        )
+    )
+    old_password_reset_token = result.scalar_one_or_none()
+
+    if old_password_reset_token:
+        await db.delete(old_password_reset_token)
         await db.flush()
 
     new_password_reset_token = PasswordResetToken(
@@ -269,35 +322,55 @@ async def password_reset_request(
 
     db.add(new_password_reset_token)
     await db.commit()
+
+    password_reset_link = (
+        f"http://localhost:8000/auth/password-reset/confirm"
+        f"?token={new_password_reset_token.token}"
+    )
+
+    email_body = (
+        "Hello!\n\n"
+        "Here is your password reset link:\n"
+        f"{password_reset_link}\n\n"
+        "This link is valid for 24 hours."
+    )
+
+    send_email(
+        user.email,
+        "Reset Your Password",
+        email_body
+    )
+
     return {
-        "message": f"Password reset token: {new_password_reset_token.token}"
+        "message": "Password reset link sent to your email"
     }
 
 
 @router.post("/auth/password-reset/confirm", status_code=200)
 async def password_reset(
+        token: str,
         data: ResetPasswordModel,
         db: AsyncSession = Depends(get_db)
 ):
     result = await db.execute(
         select(PasswordResetToken)
-        .where(PasswordResetToken.token == data.token)
+        .where(PasswordResetToken.token == token)
     )
 
-    token = result.scalar_one_or_none()
+    token_obj = result.scalar_one_or_none()
 
-    if token is None:
+    if token_obj is None:
         raise HTTPException(
             status_code=404, detail="Password reset token does not exist"
         )
 
-    if token.expires_at < datetime.now(timezone.utc):
+    if token_obj.expires_at < datetime.now(timezone.utc):
         raise HTTPException(
             status_code=400,
             detail="Password reset token expired"
         )
 
-    result = await db.execute(select(User).where(User.id == token.user_id))
+    result = await db.execute(select(User).where(User.id == token_obj.user_id))
 
     user = result.scalar_one_or_none()
 
@@ -310,7 +383,7 @@ async def password_reset(
     new_hashed_password = hash_password(data.new_password)
 
     user.hashed_password = new_hashed_password
-    await db.delete(token)
+    await db.delete(token_obj)
     await db.commit()
 
     return {"message": "Password reset successfully"}
