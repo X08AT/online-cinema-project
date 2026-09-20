@@ -6,10 +6,10 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.security import hash_password, verify_password, create_access_token
-from app.db.dependencies import get_db
+from app.db.dependencies import get_db, get_current_user
 from app.models.user import User, UserGroup, UserGroupEnum, ActivationToken, RefreshToken
 from app.schemas.auth import RegistrationModel, ActivationTokenModel, ResendActivationTokenModel, LoginModel, \
-    TokenRefreshModel, LogoutModel
+    TokenRefreshModel, LogoutModel, ChangePasswordModel
 
 router = APIRouter()
 
@@ -170,3 +170,17 @@ async def logout(data: LogoutModel, db: AsyncSession = Depends(get_db)):
     await db.commit()
 
     return {"message": "You have been logged out"}
+
+
+@router.post("/auth/change-password", status_code=200)
+async def change_password(data: ChangePasswordModel, current_user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
+    if not verify_password(data.old_password, current_user.hashed_password):
+        raise HTTPException(status_code=400, detail="Incorrect password")
+
+    new_password = hash_password(data.password)
+
+    current_user.hashed_password = new_password
+
+    await db.commit()
+
+    return {"message": "Password changed"}
