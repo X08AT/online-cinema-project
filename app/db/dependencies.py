@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.settings import settings
 from app.db.session import SessionLocal
-from app.models.user import User
+from app.models.user import User, UserGroup, UserGroupEnum
 
 security = HTTPBearer()
 
@@ -43,3 +43,34 @@ async def get_current_user(
         raise HTTPException(status_code=404, detail="User does not exist")
 
     return user
+
+
+async def require_admin(current_user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(UserGroup).where(UserGroup.id == current_user.group_id))
+
+    group = result.scalar_one_or_none()
+
+    if group is None or group.name != UserGroupEnum.ADMIN.value:
+        raise HTTPException(
+            status_code=403,
+            detail="You are not an admin"
+        )
+
+    return current_user
+
+
+async def require_moderator(current_user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(UserGroup).where(UserGroup.id == current_user.group_id))
+
+    group = result.scalar_one_or_none()
+
+    if group is None or (
+            group.name != UserGroupEnum.ADMIN.value
+            and group.name != UserGroupEnum.MODERATOR.value
+    ):
+        raise HTTPException(
+            status_code=403,
+            detail="You are not a moderator"
+        )
+
+    return current_user
