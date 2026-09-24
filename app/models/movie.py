@@ -1,9 +1,10 @@
 import uuid
 from decimal import Decimal
+from typing import List
 from uuid import UUID
 
 from sqlalchemy import DECIMAL, ForeignKey, UniqueConstraint
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.session import Base
 
@@ -35,6 +36,11 @@ class Certification(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(unique=True)
 
+    movies: Mapped[List["Movie"]] = relationship(
+        "Movie",
+        back_populates="certification"
+    )
+
 
 class Movie(Base):
     __tablename__ = "movies"
@@ -56,6 +62,11 @@ class Movie(Base):
     price: Mapped[Decimal] = mapped_column(DECIMAL(10, 2))
     certification_id: Mapped[int] = mapped_column(
         ForeignKey("certifications.id")
+    )
+
+    certification: Mapped[Certification] = relationship(
+        "Certification",
+        back_populates="movies"
     )
 
 
