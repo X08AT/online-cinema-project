@@ -1,0 +1,33 @@
+from fastapi import APIRouter, Depends, UploadFile, File, HTTPException
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.crud.profile import get_profile_by_user_id, create_profile
+from app.db.dependencies import get_current_user, get_db
+from app.models.user import User
+from app.schemas.profile import ProfileCreateModel, ProfileCreateResponseModel
+from app.services.minio_service import upload_avatar
+
+router = APIRouter()
+
+
+@router.post(
+    "/profile",
+    status_code=201,
+    response_model=ProfileCreateResponseModel
+)
+async def profile_create(
+        data: ProfileCreateModel = Depends(ProfileCreateModel.as_form),
+        avatar: UploadFile = File(...),
+        current_user: User = Depends(get_current_user),
+        db: AsyncSession = Depends(get_db)
+):
+    profile = await get_profile_by_user_id(current_user.id, db)
+
+    if profile:
+        raise HTTPException(status_code=409, detail="Profile already created")
+
+    avatar_path = upload_avatar(avatar)
+
+    new_profile = await create_profile(current_user.id, db, data, avatar_path)
+
+    return new_profile
