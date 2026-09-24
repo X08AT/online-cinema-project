@@ -42,11 +42,18 @@ async def get_current_user(
     if user is None:
         raise HTTPException(status_code=404, detail="User does not exist")
 
+    if not user.is_active:
+        raise HTTPException(status_code=403, detail="Inactive user")
+
     return user
 
 
-async def require_admin(current_user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
-    result = await db.execute(select(UserGroup).where(UserGroup.id == current_user.group_id))
+async def require_admin(
+        current_user: User = Depends(get_current_user),
+        db: AsyncSession = Depends(get_db)
+):
+    result = await db.execute(select(UserGroup)
+                              .where(UserGroup.id == current_user.group_id))
 
     group = result.scalar_one_or_none()
 
@@ -59,8 +66,12 @@ async def require_admin(current_user: User = Depends(get_current_user), db: Asyn
     return current_user
 
 
-async def require_moderator(current_user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
-    result = await db.execute(select(UserGroup).where(UserGroup.id == current_user.group_id))
+async def require_moderator(
+        current_user: User = Depends(get_current_user),
+        db: AsyncSession = Depends(get_db)
+):
+    result = await db.execute(select(UserGroup)
+                              .where(UserGroup.id == current_user.group_id))
 
     group = result.scalar_one_or_none()
 
