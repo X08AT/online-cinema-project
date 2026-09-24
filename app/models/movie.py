@@ -70,3 +70,16 @@ class MovieGenre(Base):
         ForeignKey("genres.id"),
         primary_key=True
     )
+
+
+class MovieStar(Base):
+    __tablename__ = "movie_stars"
+
+    movie_id: Mapped[int] = mapped_column(
+        ForeignKey("movies.id"),
+        primary_key=True
+    )
+    star_id: Mapped[int] = mapped_column(
+        ForeignKey("stars.id"),
+        primary_key=True
+    )
