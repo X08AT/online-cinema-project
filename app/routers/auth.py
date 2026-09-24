@@ -216,7 +216,7 @@ async def login(data: LoginModel, db: AsyncSession = Depends(get_db)):
     if not verify_password(data.password, user.hashed_password):
         raise HTTPException(status_code=401, detail="Incorrect password")
 
-    access_token = create_access_token(data={"sub": user.id})
+    access_token = create_access_token(data={"sub": str(user.id)})
     refresh_token = RefreshToken(
         token=secrets.token_urlsafe(32),
         user_id=user.id,
@@ -252,7 +252,9 @@ async def refresh_token(
             detail="Refresh token has expired"
         )
 
-    new_access_token = create_access_token(data={"sub": refresh_token.user_id})
+    new_access_token = create_access_token(
+        data={"sub": str(refresh_token.user_id)}
+    )
 
     return {"access_token": new_access_token}
 
