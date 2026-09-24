@@ -31,7 +31,7 @@ class ProfileCreateModel(BaseModel):
         )
 
 
-class ProfileCreateResponseModel(BaseModel):
+class ProfileResponseModel(BaseModel):
     id: int
     user_id: int
     first_name: str | None
