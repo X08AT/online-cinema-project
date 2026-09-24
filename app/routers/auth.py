@@ -44,7 +44,7 @@ async def register(
     user = result.scalar_one_or_none()
 
     if user is not None:
-        raise HTTPException(status_code=400, detail="Email already registered")
+        raise HTTPException(status_code=409, detail="Email already registered")
 
     result = await db.execute(
         select(UserGroup).where(UserGroup.name == UserGroupEnum.USER.value)
@@ -116,7 +116,10 @@ async def activate(
         raise HTTPException(status_code=404, detail="Token does not exist")
 
     if token_obj.expires_at < datetime.now(timezone.utc):
-        raise HTTPException(status_code=404, detail="Token expired")
+        raise HTTPException(
+            status_code=400,
+            detail="Activation token has expired"
+        )
 
     result = await db.execute(select(User).where(User.id == token_obj.user_id))
 
@@ -152,8 +155,8 @@ async def resend_activation(
 
     if user.is_active:
         raise HTTPException(
-            status_code=400,
-            detail="User already active"
+            status_code=409,
+            detail="User is already active"
         )
 
     result = await db.execute(
@@ -208,10 +211,10 @@ async def login(data: LoginModel, db: AsyncSession = Depends(get_db)):
         raise HTTPException(status_code=404, detail="User does not exist")
 
     if not user.is_active:
-        raise HTTPException(status_code=400, detail="User is not active")
+        raise HTTPException(status_code=403, detail="User is not active")
 
     if not verify_password(data.password, user.hashed_password):
-        raise HTTPException(status_code=400, detail="Incorrect password")
+        raise HTTPException(status_code=401, detail="Incorrect password")
 
     access_token = create_access_token(data={"sub": user.id})
     refresh_token = RefreshToken(
@@ -239,12 +242,15 @@ async def refresh_token(
 
     if refresh_token is None:
         raise HTTPException(
-            status_code=404,
-            detail="Refresh token does not exist"
+            status_code=401,
+            detail="Invalid refresh token"
         )
 
     if refresh_token.expires_at < datetime.now(timezone.utc):
-        raise HTTPException(status_code=400, detail="Refresh token expired")
+        raise HTTPException(
+            status_code=401,
+            detail="Refresh token has expired"
+        )
 
     new_access_token = create_access_token(data={"sub": refresh_token.user_id})
 
@@ -278,7 +284,7 @@ async def change_password(
     db: AsyncSession = Depends(get_db),
 ):
     if not verify_password(data.old_password, current_user.hashed_password):
-        raise HTTPException(status_code=400, detail="Incorrect password")
+        raise HTTPException(status_code=400, detail="Incorrect old password")
 
     new_password = hash_password(data.password)
 
@@ -301,7 +307,7 @@ async def password_reset_request(
         raise HTTPException(status_code=404, detail="User does not exist")
 
     if not user.is_active:
-        raise HTTPException(status_code=400, detail="User is not active")
+        raise HTTPException(status_code=403, detail="User is not active")
 
     result = await db.execute(
         select(PasswordResetToken).where(
@@ -378,7 +384,7 @@ async def password_reset(
         raise HTTPException(status_code=404, detail="User does not exist")
 
     if not user.is_active:
-        raise HTTPException(status_code=400, detail="User is not active")
+        raise HTTPException(status_code=403, detail="User is not active")
 
     new_hashed_password = hash_password(data.new_password)
 
