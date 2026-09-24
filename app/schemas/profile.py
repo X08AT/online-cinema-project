@@ -31,6 +31,31 @@ class ProfileCreateModel(BaseModel):
         )
 
 
+class ProfileUpdateModel(BaseModel):
+    first_name: str | None = None
+    last_name: str | None = None
+    gender: GenderEnum | None = None
+    date_of_birth: date | None = None
+    info: str | None = None
+
+    @classmethod
+    def as_form(
+            cls,
+            first_name: str | None = Form(None),
+            last_name: str | None = Form(None),
+            gender: GenderEnum | None = Form(None),
+            date_of_birth: date | None = Form(None),
+            info: str | None = Form(None),
+    ):
+        return cls(
+            first_name=first_name,
+            last_name=last_name,
+            gender=gender,
+            date_of_birth=date_of_birth,
+            info=info,
+        )
+
+
 class ProfileResponseModel(BaseModel):
     id: int
     user_id: int
