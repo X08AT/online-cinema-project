@@ -37,3 +37,26 @@ async def admin_update_group(
     await db.commit()
 
     return {"message": "User group changed successfully"}
+
+
+@router.patch("/admin/users/{user_id}/activate", status_code=200)
+async def admin_activate_user(
+        user_id: int,
+        db: AsyncSession = Depends(get_db),
+        _admin: User = Depends(require_admin)
+):
+    result = await db.execute(select(User).where(User.id == user_id))
+
+    user = result.scalar_one_or_none()
+
+    if user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    if user.is_active:
+        raise HTTPException(status_code=409, detail="User is already active")
+
+    user.is_active = True
+
+    await db.commit()
+
+    return {"message": "User activated successfully"}
