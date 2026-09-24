@@ -9,6 +9,6 @@ COPY pyproject.toml poetry.lock ./
 RUN poetry config virtualenvs.create false \
     && poetry install --no-interaction --no-ansi
 
-COPY ./app /app
+COPY . /app
 
-CMD ["poetry", "run", "fastapi", "run", "main.py", "--port", "80"]
+CMD ["poetry", "run", "fastapi", "run", "app/main.py", "--port", "80"]
