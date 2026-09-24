@@ -42,7 +42,7 @@ async def update_profile(
 ):
     profile = await get_profile_by_user_id(user_id, db)
 
-    update_data = data.model_dump(exclude_unset=True)
+    update_data = data.model_dump(exclude_none=True)
 
     for field, value in update_data.items():
         setattr(profile, field, value)
