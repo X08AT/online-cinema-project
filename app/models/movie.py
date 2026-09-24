@@ -15,6 +15,12 @@ class Genre(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(unique=True)
 
+    movies: Mapped[List["Movie"]] = relationship(
+        "Movie",
+        secondary="movie_genres",
+        back_populates="genres"
+    )
+
 
 class Star(Base):
     __tablename__ = "stars"
@@ -22,12 +28,24 @@ class Star(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(unique=True)
 
+    movies: Mapped[List["Movie"]] = relationship(
+        "Movie",
+        secondary="movie_stars",
+        back_populates="stars"
+    )
+
 
 class Director(Base):
     __tablename__ = "directors"
 
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(unique=True)
+
+    movies: Mapped[List["Movie"]] = relationship(
+        "Movie",
+        secondary="movie_directors",
+        back_populates="directors"
+    )
 
 
 class Certification(Base):
@@ -66,6 +84,21 @@ class Movie(Base):
 
     certification: Mapped[Certification] = relationship(
         "Certification",
+        back_populates="movies"
+    )
+    genres: Mapped[List["Genre"]] = relationship(
+        "Genre",
+        secondary="movie_genres",
+        back_populates="movies"
+    )
+    stars: Mapped[List["Star"]] = relationship(
+        "Star",
+        secondary="movie_stars",
+        back_populates="movies"
+    )
+    directors: Mapped[List["Director"]] = relationship(
+        "Director",
+        secondary="movie_directors",
         back_populates="movies"
     )
 
