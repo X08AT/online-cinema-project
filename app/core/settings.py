@@ -9,6 +9,10 @@ class Settings(BaseSettings):
     MAIL_HOST: str
     MAIL_PORT: int
     MAIL_FROM: str
+    MINIO_ROOT_USER: str
+    MINIO_ROOT_PASSWORD: str
+    MINIO_ENDPOINT: str
+    MINIO_BUCKET: str
 
     model_config = SettingsConfigDict(
         env_file=".env",
