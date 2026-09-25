@@ -432,7 +432,11 @@ async def movie_create(
     return movie
 
 
-@router.get("/movies", status_code=200, response_model=MovieResponseModel)
+@router.get(
+    "/movies",
+    status_code=200,
+    response_model=list[MovieResponseModel]
+)
 async def movies_list(
     db: AsyncSession = Depends(get_db),
     skip: int = Query(default=0, ge=0),
