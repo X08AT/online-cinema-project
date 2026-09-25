@@ -23,7 +23,7 @@ from app.crud.genre import (
     update_genre,
     delete_genre
 )
-from app.crud.movie import create_movie, get_movies
+from app.crud.movie import create_movie, get_movies, get_movie_by_id
 from app.crud.star import (
     create_star,
     get_stars,
@@ -433,6 +433,20 @@ async def movies_list(
     skip: int = Query(default=0, ge=0),
     limit: int = Query(default=10, ge=1, le=100),
 ):
-    movies = get_movies(db, skip, limit)
+    movies = await get_movies(db, skip, limit)
 
     return movies
+
+
+@router.get(
+    "/movies/{movie_id}",
+    status_code=200,
+    response_model=MovieResponseModel
+)
+async def movie_get_by_id(movie_id: int, db: AsyncSession = Depends(get_db)):
+    movie = await get_movie_by_id(movie_id, db)
+
+    if movie is None:
+        raise HTTPException(status_code=404, detail="Movie not found")
+
+    return movie
