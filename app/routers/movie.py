@@ -27,7 +27,7 @@ from app.crud.movie import (
     create_movie,
     get_movies,
     get_movie_by_id,
-    update_movie
+    update_movie, delete_movie
 )
 from app.crud.star import (
     create_star,
@@ -477,3 +477,20 @@ async def movie_update(
         raise HTTPException(status_code=404, detail="Movie not found")
 
     return updated_movie
+
+
+@router.delete(
+    "/movies/{movie_id}",
+    status_code=200
+)
+async def movie_delete(
+        movie_id: int,
+        db: AsyncSession = Depends(get_db),
+        _moderator: User = Depends(require_moderator)
+):
+    deleted = await delete_movie(movie_id, db)
+
+    if not deleted:
+        raise HTTPException(status_code=404, detail="Movie not found")
+
+    return {"message": "Movie deleted successfully"}
