@@ -2,6 +2,13 @@ from fastapi import APIRouter, HTTPException
 from fastapi.params import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.crud.director import (
+    create_director,
+    get_directors,
+    get_director_by_id,
+    update_director,
+    delete_director
+)
 from app.crud.genre import (
     create_genre,
     get_genres,
@@ -188,3 +195,100 @@ async def star_delete(
         )
 
     return {"message": "Star deleted successfully"}
+
+
+@router.post(
+    "/directors",
+    status_code=201,
+    response_model=NamedEntityResponseModel
+)
+async def director_create(
+    data: NamedEntityCreateModel,
+    db: AsyncSession = Depends(get_db),
+    _moderator: User = Depends(require_moderator)
+):
+    director = await create_director(data, db)
+
+    return director
+
+
+@router.get(
+    "/directors",
+    status_code=200,
+    response_model=list[NamedEntityResponseModel]
+)
+async def directors_list(
+    db: AsyncSession = Depends(get_db)
+):
+    directors = await get_directors(db)
+
+    return directors
+
+
+@router.get(
+    "/directors/{director_id}",
+    status_code=200,
+    response_model=NamedEntityResponseModel
+)
+async def director_get_by_id(
+    director_id: int,
+    db: AsyncSession = Depends(get_db)
+):
+    director = await get_director_by_id(director_id, db)
+
+    if director is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Director not found"
+        )
+
+    return director
+
+
+@router.patch(
+    "/directors/{director_id}",
+    status_code=200,
+    response_model=NamedEntityResponseModel
+)
+async def director_update(
+    data: NamedEntityUpdateModel,
+    director_id: int,
+    db: AsyncSession = Depends(get_db),
+    _moderator: User = Depends(require_moderator)
+):
+    director = await update_director(
+        data,
+        director_id,
+        db
+    )
+
+    if director is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Director not found"
+        )
+
+    return director
+
+
+@router.delete(
+    "/directors/{director_id}",
+    status_code=200
+)
+async def director_delete(
+    director_id: int,
+    db: AsyncSession = Depends(get_db),
+    _moderator: User = Depends(require_moderator)
+):
+    deleted = await delete_director(
+        director_id,
+        db
+    )
+
+    if not deleted:
+        raise HTTPException(
+            status_code=404,
+            detail="Director not found"
+        )
+
+    return {"message": "Director deleted successfully"}
