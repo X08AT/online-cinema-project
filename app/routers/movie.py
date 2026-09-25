@@ -1,0 +1,93 @@
+from fastapi import APIRouter, HTTPException
+from fastapi.params import Depends
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.crud.genre import (
+    create_genre,
+    get_genres,
+    get_genre_by_id,
+    update_genre,
+    delete_genre
+)
+from app.db.dependencies import get_db, require_moderator
+from app.models.user import User
+from app.schemas.movie import (
+    NamedEntityUpdateModel,
+    NamedEntityResponseModel,
+    NamedEntityCreateModel
+)
+
+router = APIRouter()
+
+
+@router.post(
+    "/genres",
+    status_code=201,
+    response_model=NamedEntityResponseModel
+)
+async def genre_create(
+        data: NamedEntityCreateModel,
+        db: AsyncSession = Depends(get_db),
+        _moderator: User = Depends(require_moderator)
+):
+    genre = await create_genre(data, db)
+
+    return genre
+
+
+@router.get(
+    "/genres",
+    status_code=200,
+    response_model=list[NamedEntityResponseModel]
+)
+async def genres_list(db: AsyncSession = Depends(get_db)):
+    genres = await get_genres(db)
+
+    return genres
+
+
+@router.get(
+    "/genres/{genre_id}",
+    status_code=200,
+    response_model=NamedEntityResponseModel
+)
+async def genre_get_by_id(genre_id: int, db: AsyncSession = Depends(get_db)):
+    genre = await get_genre_by_id(genre_id, db)
+
+    if genre is None:
+        raise HTTPException(status_code=404, detail="Genre not found")
+
+    return genre
+
+
+@router.patch(
+    "/genres/{genre_id}",
+    status_code=200,
+    response_model=NamedEntityResponseModel
+)
+async def genre_update(
+        data: NamedEntityUpdateModel,
+        genre_id: int,
+        db: AsyncSession = Depends(get_db),
+        _moderator: User = Depends(require_moderator)
+):
+    genre = await update_genre(data, genre_id, db)
+
+    if genre is None:
+        raise HTTPException(status_code=404, detail="Genre not found")
+
+    return genre
+
+
+@router.delete("/genres/{genre_id}", status_code=200)
+async def genre_delete(
+        genre_id: int,
+        db: AsyncSession = Depends(get_db),
+        _moderator: User = Depends(require_moderator)
+):
+    deleted = await delete_genre(genre_id, db)
+
+    if not deleted:
+        raise HTTPException(status_code=404, detail="Genre not found")
+
+    return {"message": "Genre deleted successfully"}
