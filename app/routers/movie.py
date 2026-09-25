@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException
-from fastapi.params import Depends
+from fastapi.params import Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.crud.certification import (
@@ -23,7 +23,7 @@ from app.crud.genre import (
     update_genre,
     delete_genre
 )
-from app.crud.movie import create_movie
+from app.crud.movie import create_movie, get_movies
 from app.crud.star import (
     create_star,
     get_stars,
@@ -425,3 +425,14 @@ async def movie_create(
         raise HTTPException(status_code=400, detail=str(e))
 
     return movie
+
+
+@router.get("/movies", status_code=200, response_model=MovieResponseModel)
+async def movies_list(
+    db: AsyncSession = Depends(get_db),
+    skip: int = Query(default=0, ge=0),
+    limit: int = Query(default=10, ge=1, le=100),
+):
+    movies = get_movies(db, skip, limit)
+
+    return movies
