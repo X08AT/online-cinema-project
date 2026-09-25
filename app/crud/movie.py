@@ -2,7 +2,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.movie import Movie, Genre, Star, Director, Certification
-from app.schemas.movie import MovieCreateModel
+from app.schemas.movie import MovieCreateModel, MovieUpdateModel
 
 
 async def create_movie(
@@ -81,5 +81,69 @@ async def get_movie_by_id(movie_id: int, db: AsyncSession) -> Movie | None:
     result = await db.execute(select(Movie).where(Movie.id == movie_id))
 
     movie = result.scalar_one_or_none()
+
+    return movie
+
+
+async def update_movie(
+        data: MovieUpdateModel,
+        movie_id: int,
+        db: AsyncSession
+) -> Movie | None:
+    movie = await get_movie_by_id(movie_id, db)
+
+    if movie is None:
+        return None
+
+    update_data = data.model_dump(
+        exclude_unset=True,
+        exclude={"genre_ids", "star_ids", "director_ids", "certification_id"}
+    )
+
+    for field, value in update_data.items():
+        setattr(movie, field, value)
+
+    if data.genre_ids is not None:
+        result = await db.execute(
+            select(Genre)
+            .where(Genre.id.in_(data.genre_ids))
+        )
+        genres = result.scalars().all()
+        if len(genres) != len(data.genre_ids):
+            raise ValueError("One or more genres do not exist")
+        movie.genres = list(genres)
+
+    if data.star_ids is not None:
+        result = await db.execute(
+            select(Star)
+            .where(Star.id.in_(data.star_ids))
+        )
+        stars = result.scalars().all()
+        if len(stars) != len(data.star_ids):
+            raise ValueError("One or more stars do not exist")
+        movie.stars = list(stars)
+
+    if data.director_ids is not None:
+        result = await db.execute(
+            select(Director)
+            .where(Director.id.in_(data.director_ids))
+        )
+        directors = result.scalars().all()
+        if len(directors) != len(data.director_ids):
+            raise ValueError("One or more directors do not exist")
+        movie.directors = list(directors)
+
+    if data.certification_id is not None:
+        result = await db.execute(
+            select(Certification)
+            .where(Certification.id == data.certification_id)
+        )
+        certification = result.scalar_one_or_none()
+        if certification is None:
+            raise ValueError("Certification does not exist")
+        movie.certification = certification
+
+    await db.commit()
+    await db.refresh(movie)
 
     return movie
