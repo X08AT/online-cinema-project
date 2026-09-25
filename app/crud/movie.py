@@ -65,12 +65,24 @@ async def create_movie(
     return movie
 
 
-async def get_movies(db: AsyncSession, skip: int, limit: int) -> list[Movie]:
-    result = await db.execute(
-        select(Movie)
-        .offset(skip)
-        .limit(limit)
-    )
+async def get_movies(
+        db: AsyncSession,
+        skip: int,
+        limit: int,
+        year: int | None = None,
+        imdb: float | None = None,
+) -> list[Movie]:
+    query = select(Movie)
+
+    if year is not None:
+        query = query.where(Movie.year == year)
+
+    if imdb is not None:
+        query = query.where(Movie.imdb >= imdb)
+
+    query = query.offset(skip).limit(limit)
+
+    result = await db.execute(query)
 
     movies = result.scalars().all()
 

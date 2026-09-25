@@ -441,8 +441,10 @@ async def movies_list(
     db: AsyncSession = Depends(get_db),
     skip: int = Query(default=0, ge=0),
     limit: int = Query(default=10, ge=1, le=100),
+    year: int = Query(default=None, ge=1888),
+    imdb: float = Query(default=None, ge=0, le=10),
 ):
-    movies = await get_movies(db, skip, limit)
+    movies = await get_movies(db, skip, limit, year, imdb)
 
     return movies
 
