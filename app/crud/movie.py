@@ -63,3 +63,15 @@ async def create_movie(
     await db.refresh(movie)
 
     return movie
+
+
+async def get_movies(db: AsyncSession, skip: int, limit: int) -> list[Movie]:
+    result = await db.execute(
+        select(Movie)
+        .offset(skip)
+        .limit(limit)
+    )
+
+    movies = result.scalars().all()
+
+    return movies
