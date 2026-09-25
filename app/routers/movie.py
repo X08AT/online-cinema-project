@@ -23,6 +23,7 @@ from app.crud.genre import (
     update_genre,
     delete_genre
 )
+from app.crud.movie import create_movie
 from app.crud.star import (
     create_star,
     get_stars,
@@ -35,7 +36,9 @@ from app.models.user import User
 from app.schemas.movie import (
     NamedEntityUpdateModel,
     NamedEntityResponseModel,
-    NamedEntityCreateModel
+    NamedEntityCreateModel,
+    MovieResponseModel,
+    MovieCreateModel
 )
 
 router = APIRouter()
@@ -404,3 +407,21 @@ async def certification_delete(
     return {
         "message": "Certification deleted successfully"
     }
+
+
+@router.post(
+    "/movies",
+    status_code=201,
+    response_model=MovieResponseModel
+)
+async def movie_create(
+        data: MovieCreateModel,
+        db: AsyncSession = Depends(get_db),
+        _moderator: User = Depends(require_moderator)
+):
+    try:
+        movie = await create_movie(db, data)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+    return movie
