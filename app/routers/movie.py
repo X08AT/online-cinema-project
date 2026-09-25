@@ -447,8 +447,18 @@ async def movies_list(
     imdb: float | None = Query(default=None, ge=0, le=10),
     sort_by: Literal["price", "year", "votes"] | None = Query(default=None),
     sort_order: Literal["asc", "desc"] = Query(default="asc"),
+    search: str | None = Query(default=None),
 ):
-    movies = await get_movies(db, skip, limit, year, imdb, sort_by, sort_order)
+    movies = await get_movies(
+        db,
+        skip,
+        limit,
+        year,
+        imdb,
+        sort_by,
+        sort_order,
+        search
+    )
 
     return movies
 

@@ -1,4 +1,4 @@
-from sqlalchemy import select
+from sqlalchemy import select, or_
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.movie import Movie, Genre, Star, Director, Certification
@@ -72,7 +72,8 @@ async def get_movies(
         year: int | None = None,
         imdb: float | None = None,
         sort_by: str | None = None,
-        sort_order: str = "asc"
+        sort_order: str = "asc",
+        search: str | None = None
 ) -> list[Movie]:
     query = select(Movie)
 
@@ -88,13 +89,23 @@ async def get_movies(
         "votes": Movie.votes,
     }
 
-    sort_colum = sort_fields.get(sort_by)
+    sort_column = sort_fields.get(sort_by)
 
-    if sort_colum is not None:
+    if sort_column is not None:
         if sort_order == "desc":
-            query = query.order_by(sort_colum.desc())
+            query = query.order_by(sort_column.desc())
         else:
-            query = query.order_by(sort_colum.asc())
+            query = query.order_by(sort_column.asc())
+
+    if search is not None:
+        query = query.where(
+            or_(
+                Movie.name.ilike(f"%{search}%"),
+                Movie.description.ilike(f"%{search}%"),
+                Movie.stars.any(Star.name.ilike(f"%{search}%")),
+                Movie.directors.any(Director.name.ilike(f"%{search}%")),
+            )
+        )
 
     query = query.offset(skip).limit(limit)
 
