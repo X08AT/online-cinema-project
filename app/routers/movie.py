@@ -23,7 +23,12 @@ from app.crud.genre import (
     update_genre,
     delete_genre
 )
-from app.crud.movie import create_movie, get_movies, get_movie_by_id
+from app.crud.movie import (
+    create_movie,
+    get_movies,
+    get_movie_by_id,
+    update_movie
+)
 from app.crud.star import (
     create_star,
     get_stars,
@@ -38,7 +43,7 @@ from app.schemas.movie import (
     NamedEntityResponseModel,
     NamedEntityCreateModel,
     MovieResponseModel,
-    MovieCreateModel
+    MovieCreateModel, MovieUpdateModel
 )
 
 router = APIRouter()
@@ -450,3 +455,25 @@ async def movie_get_by_id(movie_id: int, db: AsyncSession = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Movie not found")
 
     return movie
+
+
+@router.patch(
+    "/movies/{movie_id}",
+    status_code=200,
+    response_model=MovieResponseModel
+)
+async def movie_update(
+        movie_id: int,
+        data: MovieUpdateModel,
+        db: AsyncSession = Depends(get_db),
+        _moderator: User = Depends(require_moderator)
+):
+    try:
+        updated_movie = await update_movie(data, movie_id, db)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+    if updated_movie is None:
+        raise HTTPException(status_code=404, detail="Movie not found")
+
+    return updated_movie
