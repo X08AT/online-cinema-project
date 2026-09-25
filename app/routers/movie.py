@@ -1,3 +1,5 @@
+from typing import Literal
+
 from fastapi import APIRouter, HTTPException
 from fastapi.params import Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -441,10 +443,12 @@ async def movies_list(
     db: AsyncSession = Depends(get_db),
     skip: int = Query(default=0, ge=0),
     limit: int = Query(default=10, ge=1, le=100),
-    year: int = Query(default=None, ge=1888),
-    imdb: float = Query(default=None, ge=0, le=10),
+    year: int | None = Query(default=None, ge=1888),
+    imdb: float | None = Query(default=None, ge=0, le=10),
+    sort_by: Literal["price", "year", "votes"] | None = Query(default=None),
+    sort_order: Literal["asc", "desc"] = Query(default="asc"),
 ):
-    movies = await get_movies(db, skip, limit, year, imdb)
+    movies = await get_movies(db, skip, limit, year, imdb, sort_by, sort_order)
 
     return movies
 

@@ -71,6 +71,8 @@ async def get_movies(
         limit: int,
         year: int | None = None,
         imdb: float | None = None,
+        sort_by: str | None = None,
+        sort_order: str = "asc"
 ) -> list[Movie]:
     query = select(Movie)
 
@@ -79,6 +81,20 @@ async def get_movies(
 
     if imdb is not None:
         query = query.where(Movie.imdb >= imdb)
+
+    sort_fields = {
+        "price": Movie.price,
+        "year": Movie.year,
+        "votes": Movie.votes,
+    }
+
+    sort_colum = sort_fields.get(sort_by)
+
+    if sort_colum is not None:
+        if sort_order == "desc":
+            query = query.order_by(sort_colum.desc())
+        else:
+            query = query.order_by(sort_colum.asc())
 
     query = query.offset(skip).limit(limit)
 
