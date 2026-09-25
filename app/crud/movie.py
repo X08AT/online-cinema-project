@@ -75,3 +75,11 @@ async def get_movies(db: AsyncSession, skip: int, limit: int) -> list[Movie]:
     movies = result.scalars().all()
 
     return movies
+
+
+async def get_movie_by_id(movie_id: int, db: AsyncSession) -> Movie | None:
+    result = await db.execute(select(Movie).where(Movie.id == movie_id))
+
+    movie = result.scalar_one_or_none()
+
+    return movie
