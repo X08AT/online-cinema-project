@@ -9,6 +9,13 @@ from app.crud.genre import (
     update_genre,
     delete_genre
 )
+from app.crud.star import (
+    create_star,
+    get_stars,
+    get_star_by_id,
+    update_star,
+    delete_star
+)
 from app.db.dependencies import get_db, require_moderator
 from app.models.user import User
 from app.schemas.movie import (
@@ -91,3 +98,93 @@ async def genre_delete(
         raise HTTPException(status_code=404, detail="Genre not found")
 
     return {"message": "Genre deleted successfully"}
+
+
+@router.post(
+    "/stars",
+    status_code=201,
+    response_model=NamedEntityResponseModel
+)
+async def star_create(
+    data: NamedEntityCreateModel,
+    db: AsyncSession = Depends(get_db),
+    _moderator: User = Depends(require_moderator)
+):
+    star = await create_star(data, db)
+
+    return star
+
+
+@router.get(
+    "/stars",
+    status_code=200,
+    response_model=list[NamedEntityResponseModel]
+)
+async def stars_list(
+    db: AsyncSession = Depends(get_db)
+):
+    stars = await get_stars(db)
+
+    return stars
+
+
+@router.get(
+    "/stars/{star_id}",
+    status_code=200,
+    response_model=NamedEntityResponseModel
+)
+async def star_get_by_id(
+    star_id: int,
+    db: AsyncSession = Depends(get_db)
+):
+    star = await get_star_by_id(star_id, db)
+
+    if star is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Star not found"
+        )
+
+    return star
+
+
+@router.patch(
+    "/stars/{star_id}",
+    status_code=200,
+    response_model=NamedEntityResponseModel
+)
+async def star_update(
+    data: NamedEntityUpdateModel,
+    star_id: int,
+    db: AsyncSession = Depends(get_db),
+    _moderator: User = Depends(require_moderator)
+):
+    star = await update_star(data, star_id, db)
+
+    if star is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Star not found"
+        )
+
+    return star
+
+
+@router.delete(
+    "/stars/{star_id}",
+    status_code=200
+)
+async def star_delete(
+    star_id: int,
+    db: AsyncSession = Depends(get_db),
+    _moderator: User = Depends(require_moderator)
+):
+    deleted = await delete_star(star_id, db)
+
+    if not deleted:
+        raise HTTPException(
+            status_code=404,
+            detail="Star not found"
+        )
+
+    return {"message": "Star deleted successfully"}
