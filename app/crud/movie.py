@@ -147,3 +147,15 @@ async def update_movie(
     await db.refresh(movie)
 
     return movie
+
+
+async def delete_movie(movie_id: int, db: AsyncSession) -> bool:
+    movie = await get_movie_by_id(movie_id, db)
+
+    if movie is None:
+        return False
+
+    await db.delete(movie)
+    await db.commit()
+
+    return True
