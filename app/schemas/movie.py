@@ -35,6 +35,22 @@ class MovieCreateModel(BaseModel):
     director_ids: set[int]
 
 
+class MovieUpdateModel(BaseModel):
+    name: str | None = Field(default=None, min_length=1)
+    year: int | None = Field(default=None, ge=1888)
+    time: int | None = Field(default=None, gt=0)
+    imdb: float | None = Field(default=None, ge=0, le=10)
+    votes: int | None = Field(default=None, ge=0)
+    meta_score: float | None = Field(default=None, ge=0, le=100)
+    gross: float | None = Field(default=None, ge=0)
+    description: str | None = Field(default=None, min_length=1)
+    price: Decimal | None = Field(default=None, gt=0)
+    certification_id: int | None = Field(default=None, gt=0)
+    genre_ids: set[int] | None = None
+    star_ids: set[int] | None = None
+    director_ids: set[int] | None = None
+
+
 class MovieResponseModel(BaseModel):
     id: int
     uuid: UUID
