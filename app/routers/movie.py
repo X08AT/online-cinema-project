@@ -2,6 +2,13 @@ from fastapi import APIRouter, HTTPException
 from fastapi.params import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.crud.certification import (
+    create_certification,
+    get_certifications,
+    get_certification_by_id,
+    update_certification,
+    delete_certification
+)
 from app.crud.director import (
     create_director,
     get_directors,
@@ -292,3 +299,108 @@ async def director_delete(
         )
 
     return {"message": "Director deleted successfully"}
+
+
+@router.post(
+    "/certifications",
+    status_code=201,
+    response_model=NamedEntityResponseModel
+)
+async def certification_create(
+    data: NamedEntityCreateModel,
+    db: AsyncSession = Depends(get_db),
+    _moderator: User = Depends(require_moderator)
+):
+    certification = await create_certification(
+        data,
+        db
+    )
+
+    return certification
+
+
+@router.get(
+    "/certifications",
+    status_code=200,
+    response_model=list[NamedEntityResponseModel]
+)
+async def certifications_list(
+    db: AsyncSession = Depends(get_db)
+):
+    certifications = await get_certifications(db)
+
+    return certifications
+
+
+@router.get(
+    "/certifications/{certification_id}",
+    status_code=200,
+    response_model=NamedEntityResponseModel
+)
+async def certification_get_by_id(
+    certification_id: int,
+    db: AsyncSession = Depends(get_db)
+):
+    certification = await get_certification_by_id(
+        certification_id,
+        db
+    )
+
+    if certification is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Certification not found"
+        )
+
+    return certification
+
+
+@router.patch(
+    "/certifications/{certification_id}",
+    status_code=200,
+    response_model=NamedEntityResponseModel
+)
+async def certification_update(
+    data: NamedEntityUpdateModel,
+    certification_id: int,
+    db: AsyncSession = Depends(get_db),
+    _moderator: User = Depends(require_moderator)
+):
+    certification = await update_certification(
+        data,
+        certification_id,
+        db
+    )
+
+    if certification is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Certification not found"
+        )
+
+    return certification
+
+
+@router.delete(
+    "/certifications/{certification_id}",
+    status_code=200
+)
+async def certification_delete(
+    certification_id: int,
+    db: AsyncSession = Depends(get_db),
+    _moderator: User = Depends(require_moderator)
+):
+    deleted = await delete_certification(
+        certification_id,
+        db
+    )
+
+    if not deleted:
+        raise HTTPException(
+            status_code=404,
+            detail="Certification not found"
+        )
+
+    return {
+        "message": "Certification deleted successfully"
+    }
