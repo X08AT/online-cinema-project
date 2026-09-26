@@ -28,3 +28,20 @@ async def create_comment(
     await db.refresh(comment)
 
     return comment
+
+
+async def get_comments_by_movie_id(
+        movie_id: int,
+        db: AsyncSession
+) -> list[MovieComment]:
+    result = await db.execute(
+        select(MovieComment)
+        .where(
+            MovieComment.movie_id == movie_id,
+            MovieComment.parent_id.is_(None)
+        )
+    )
+
+    comments = result.scalars().all()
+
+    return comments
