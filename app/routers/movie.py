@@ -31,7 +31,7 @@ from app.crud.movie import (
     get_movie_by_id,
     update_movie, delete_movie, get_movies_by_genre
 )
-from app.crud.reaction import set_movie_reaction
+from app.crud.reaction import set_movie_reaction, remove_movie_reaction
 from app.crud.star import (
     create_star,
     get_stars,
@@ -552,3 +552,17 @@ async def dislike_movie(
     await set_movie_reaction(movie_id, ReactionEnum.DISLIKE, current_user, db)
 
     return {"message": "Movie disliked successfully"}
+
+
+@router.delete("/movies/{movie_id}/reaction", status_code=200)
+async def delete_movie_reaction(
+        movie_id: int,
+        current_user: User = Depends(get_current_user),
+        db: AsyncSession = Depends(get_db)
+):
+    deleted = await remove_movie_reaction(movie_id, current_user, db)
+
+    if not deleted:
+        raise HTTPException(status_code=404, detail="Movie reaction not found")
+
+    return {"message": "Movie reaction deleted successfully"}
