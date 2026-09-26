@@ -104,6 +104,7 @@ class CommentResponseModel(BaseModel):
     content: str
     created_at: datetime
     updated_at: datetime
+    likes_count: int
     replies: list["ReplyResponseModel"] = Field(default_factory=list)
 
     model_config = ConfigDict(from_attributes=True)
@@ -117,5 +118,6 @@ class ReplyResponseModel(BaseModel):
     content: str
     created_at: datetime
     updated_at: datetime
+    likes_count: int
 
     model_config = ConfigDict(from_attributes=True)
