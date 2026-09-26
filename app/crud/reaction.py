@@ -32,3 +32,27 @@ async def set_movie_reaction(
         reaction.reaction = reaction_type
 
     await db.commit()
+
+
+async def remove_movie_reaction(
+        movie_id: int,
+        user: User,
+        db: AsyncSession
+) -> bool:
+    result = await db.execute(
+        select(MovieReaction)
+        .where(
+            MovieReaction.movie_id == movie_id,
+            MovieReaction.user_id == user.id
+        )
+    )
+
+    reaction = result.scalar_one_or_none()
+
+    if reaction is None:
+        return False
+
+    await db.delete(reaction)
+    await db.commit()
+
+    return True
