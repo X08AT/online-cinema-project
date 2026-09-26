@@ -20,6 +20,7 @@ from app.models.movie import (
     MovieDirector,
     MovieReaction,
     MovieComment,
+    CommentLike,
 )
 from app.models.user import (
     UserGroup,
