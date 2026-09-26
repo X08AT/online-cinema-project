@@ -104,5 +104,18 @@ class CommentResponseModel(BaseModel):
     content: str
     created_at: datetime
     updated_at: datetime
+    replies: list["ReplyResponseModel"] = Field(default_factory=list)
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class ReplyResponseModel(BaseModel):
+    id: int
+    user_id: int
+    movie_id: int
+    parent_id: int | None
+    content: str
+    created_at: datetime
+    updated_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
