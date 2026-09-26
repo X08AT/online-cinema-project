@@ -240,3 +240,25 @@ class MovieComment(Base):
         "MovieComment",
         back_populates="parent"
     )
+    likes: Mapped[List["CommentLike"]] = relationship(
+        "CommentLike",
+        back_populates="comment"
+    )
+
+
+class CommentLike(Base):
+    __tablename__ = "comment_likes"
+
+    __table_args__ = (
+        UniqueConstraint("user_id", "comment_id"),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    comment_id: Mapped[int] = mapped_column(ForeignKey("movie_comments.id"))
+
+    user: Mapped["User"] = relationship("User", back_populates="comment_likes")
+    comment: Mapped[MovieComment] = relationship(
+        "MovieComment",
+        back_populates="likes"
+    )
