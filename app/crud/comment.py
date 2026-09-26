@@ -1,5 +1,6 @@
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from app.models.movie import MovieComment, Movie
 from app.schemas.movie import CommentCreateModel, CommentUpdateModel
@@ -25,9 +26,8 @@ async def create_comment(
     )
     db.add(comment)
     await db.commit()
-    await db.refresh(comment)
 
-    return comment
+    return await get_comment_by_id(comment.id, db)
 
 
 async def get_comments_by_movie_id(
@@ -36,6 +36,9 @@ async def get_comments_by_movie_id(
 ) -> list[MovieComment]:
     result = await db.execute(
         select(MovieComment)
+        .options(
+            selectinload(MovieComment.replies)
+        )
         .where(
             MovieComment.movie_id == movie_id,
             MovieComment.parent_id.is_(None)
@@ -69,9 +72,8 @@ async def update_comment(
     comment.content = data.content
 
     await db.commit()
-    await db.refresh(comment)
 
-    return comment
+    return await get_comment_by_id(comment.id, db)
 
 
 async def delete_comment(
@@ -120,6 +122,20 @@ async def create_reply(
     )
     db.add(reply)
     await db.commit()
-    await db.refresh(reply)
 
-    return reply
+    return await get_comment_by_id(reply.id, db)
+
+
+async def get_comment_by_id(
+        comment_id: int,
+        db: AsyncSession
+) -> MovieComment | None:
+    result = await db.execute(
+        select(MovieComment)
+        .options(
+            selectinload(MovieComment.replies)
+        )
+        .where(MovieComment.id == comment_id)
+    )
+
+    return result.scalar_one_or_none()
