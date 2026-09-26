@@ -1,12 +1,18 @@
 import uuid
 from decimal import Decimal
+from enum import Enum
 from typing import List
 from uuid import UUID
 
-from sqlalchemy import DECIMAL, ForeignKey, UniqueConstraint
+from sqlalchemy import DECIMAL, ForeignKey, UniqueConstraint, Enum as SQLEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.session import Base
+
+
+class ReactionEnum(str, Enum):
+    LIKE = "like"
+    DISLIKE = "dislike"
 
 
 class Genre(Base):
@@ -101,6 +107,10 @@ class Movie(Base):
         secondary="movie_directors",
         back_populates="movies"
     )
+    reactions: Mapped[List["MovieReaction"]] = relationship(
+        "MovieReaction",
+        back_populates="movie",
+    )
 
 
 class MovieGenre(Base):
@@ -139,4 +149,26 @@ class MovieDirector(Base):
     director_id: Mapped[int] = mapped_column(
         ForeignKey("directors.id"),
         primary_key=True
+    )
+
+
+class MovieReaction(Base):
+    __tablename__ = "movie_reactions"
+
+    __table_args__ = (
+        UniqueConstraint("user_id", "movie_id"),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    movie_id: Mapped[int] = mapped_column(ForeignKey("movies.id"))
+    reaction: Mapped[ReactionEnum] = mapped_column(SQLEnum(ReactionEnum))
+
+    movie: Mapped[Movie] = relationship(
+        "Movie",
+        back_populates="reactions"
+    )
+    user: Mapped["User"] = relationship(
+        "User",
+        back_populates="reactions"
     )

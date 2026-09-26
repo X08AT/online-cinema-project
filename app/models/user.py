@@ -61,6 +61,10 @@ class User(Base):
     refresh_tokens: Mapped[List["RefreshToken"]] = relationship(
         "RefreshToken", back_populates="user"
     )
+    reactions: Mapped[List["MovieReaction"]] = relationship(
+        "MovieReaction",
+        back_populates="user"
+    )
 
 
 class UserProfile(Base):
