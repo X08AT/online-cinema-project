@@ -65,6 +65,10 @@ class User(Base):
         "MovieReaction",
         back_populates="user"
     )
+    comments: Mapped[List["MovieComment"]] = relationship(
+        "MovieComment",
+        back_populates="user"
+    )
 
 
 class UserProfile(Base):

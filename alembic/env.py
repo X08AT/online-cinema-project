@@ -18,6 +18,8 @@ from app.models.movie import (
     MovieGenre,
     MovieStar,
     MovieDirector,
+    MovieReaction,
+    MovieComment,
 )
 from app.models.user import (
     UserGroup,

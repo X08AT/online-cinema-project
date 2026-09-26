@@ -1,10 +1,18 @@
 import uuid
+from datetime import datetime
 from decimal import Decimal
 from enum import Enum
 from typing import List
 from uuid import UUID
 
-from sqlalchemy import DECIMAL, ForeignKey, UniqueConstraint, Enum as SQLEnum
+from sqlalchemy import (
+    DECIMAL,
+    ForeignKey,
+    UniqueConstraint,
+    Enum as SQLEnum,
+    DateTime,
+    func
+)
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.session import Base
@@ -127,6 +135,10 @@ class Movie(Base):
         "MovieReaction",
         back_populates="movie",
     )
+    comments: Mapped[List["MovieComment"]] = relationship(
+        "MovieComment",
+        back_populates="movie",
+    )
 
 
 class MovieGenre(Base):
@@ -187,4 +199,44 @@ class MovieReaction(Base):
     user: Mapped["User"] = relationship(
         "User",
         back_populates="reactions"
+    )
+
+
+class MovieComment(Base):
+    __tablename__ = "movie_comments"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    movie_id: Mapped[int] = mapped_column(ForeignKey("movies.id"))
+    parent_id: Mapped[int | None] = mapped_column(
+        ForeignKey("movie_comments.id"),
+        nullable=True
+    )
+    content: Mapped[str] = mapped_column()
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now()
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        onupdate=func.now()
+    )
+
+    movie: Mapped[Movie] = relationship(
+        "Movie",
+        back_populates="comments"
+    )
+    user: Mapped["User"] = relationship(
+        "User",
+        back_populates="comments"
+    )
+    parent: Mapped["MovieComment" | None] = relationship(
+        "MovieComment",
+        back_populates="replies",
+        remote_side=[id]
+    )
+    replies: Mapped[List["MovieComment"]] = relationship(
+        "MovieComment",
+        back_populates="parent"
     )
