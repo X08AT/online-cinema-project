@@ -61,9 +61,8 @@ async def create_movie(
 
     db.add(movie)
     await db.commit()
-    await db.refresh(movie)
 
-    return movie
+    return await get_movie_by_id(movie.id, db)
 
 
 async def get_movies(
@@ -77,7 +76,11 @@ async def get_movies(
         search: str | None = None
 ) -> list[Movie]:
     query = select(Movie).options(
-        selectinload(Movie.reactions)
+        selectinload(Movie.certification),
+        selectinload(Movie.genres),
+        selectinload(Movie.stars),
+        selectinload(Movie.directors),
+        selectinload(Movie.reactions),
     )
 
     if year is not None:
@@ -122,7 +125,13 @@ async def get_movies(
 async def get_movie_by_id(movie_id: int, db: AsyncSession) -> Movie | None:
     result = await db.execute(
         select(Movie)
-        .options(selectinload(Movie.reactions))
+        .options(
+            selectinload(Movie.certification),
+            selectinload(Movie.genres),
+            selectinload(Movie.stars),
+            selectinload(Movie.directors),
+            selectinload(Movie.reactions),
+        )
         .where(Movie.id == movie_id)
     )
 
@@ -190,9 +199,8 @@ async def update_movie(
         movie.certification = certification
 
     await db.commit()
-    await db.refresh(movie)
 
-    return movie
+    return await get_movie_by_id(movie.id, db)
 
 
 async def delete_movie(movie_id: int, db: AsyncSession) -> bool:
@@ -210,7 +218,13 @@ async def delete_movie(movie_id: int, db: AsyncSession) -> bool:
 async def get_movies_by_genre(genre_id: int, db: AsyncSession) -> list[Movie]:
     result = await db.execute(
         select(Movie)
-        .options(selectinload(Movie.reactions))
+        .options(
+            selectinload(Movie.certification),
+            selectinload(Movie.genres),
+            selectinload(Movie.stars),
+            selectinload(Movie.directors),
+            selectinload(Movie.reactions),
+        )
         .where(Movie.genres.any(Genre.id == genre_id))
     )
 
