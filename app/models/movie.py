@@ -231,7 +231,7 @@ class MovieComment(Base):
         "User",
         back_populates="comments"
     )
-    parent: Mapped["MovieComment" | None] = relationship(
+    parent: Mapped["MovieComment | None"] = relationship(
         "MovieComment",
         back_populates="replies",
         remote_side=[id]
