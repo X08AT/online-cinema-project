@@ -14,7 +14,7 @@ from app.crud.certification import (
 from app.crud.comment import (
     create_comment,
     get_comments_by_movie_id,
-    update_comment
+    update_comment, delete_comment
 )
 from app.crud.director import (
     create_director,
@@ -642,3 +642,22 @@ async def comment_update(
         raise HTTPException(status_code=403, detail=str(e))
 
     return comment
+
+
+@router.delete(
+    "/comments/{comment_id}",
+    status_code=200,
+)
+async def comment_delete(
+        comment_id: int,
+        current_user: User = Depends(get_current_user),
+        db: AsyncSession = Depends(get_db)
+):
+    try:
+        await delete_comment(comment_id, current_user.id, db)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except PermissionError as e:
+        raise HTTPException(status_code=403, detail=str(e))
+
+    return {"message": "Comment deleted successfully"}
