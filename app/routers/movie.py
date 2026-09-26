@@ -11,7 +11,11 @@ from app.crud.certification import (
     update_certification,
     delete_certification
 )
-from app.crud.comment import create_comment, get_comments_by_movie_id
+from app.crud.comment import (
+    create_comment,
+    get_comments_by_movie_id,
+    update_comment
+)
 from app.crud.director import (
     create_director,
     get_directors,
@@ -52,7 +56,7 @@ from app.schemas.movie import (
     MovieUpdateModel,
     GenreWithCountResponseModel,
     CommentResponseModel,
-    CommentCreateModel
+    CommentCreateModel, CommentUpdateModel
 )
 
 router = APIRouter()
@@ -617,3 +621,24 @@ async def movie_comments(
     comments = await get_comments_by_movie_id(movie_id, db)
 
     return comments
+
+
+@router.patch(
+    "/comments/{comment_id}",
+    status_code=200,
+    response_model=CommentResponseModel
+)
+async def comment_update(
+        comment_id: int,
+        data: CommentUpdateModel,
+        current_user: User = Depends(get_current_user),
+        db: AsyncSession = Depends(get_db)
+):
+    try:
+        comment = await update_comment(comment_id, current_user.id, data, db)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except PermissionError as e:
+        raise HTTPException(status_code=403, detail=str(e))
+
+    return comment
