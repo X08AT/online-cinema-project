@@ -94,3 +94,32 @@ async def delete_comment(
 
     await db.delete(comment)
     await db.commit()
+
+
+async def create_reply(
+        comment_id: int,
+        user_id: int,
+        data: CommentCreateModel,
+        db: AsyncSession
+) -> MovieComment:
+    result = await db.execute(
+        select(MovieComment)
+        .where(MovieComment.id == comment_id)
+    )
+
+    comment = result.scalar_one_or_none()
+
+    if comment is None:
+        raise ValueError("Comment not found")
+
+    reply = MovieComment(
+        user_id=user_id,
+        movie_id=comment.movie_id,
+        parent_id=comment_id,
+        **data.model_dump()
+    )
+    db.add(reply)
+    await db.commit()
+    await db.refresh(reply)
+
+    return reply
