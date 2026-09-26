@@ -11,7 +11,7 @@ from app.crud.certification import (
     update_certification,
     delete_certification
 )
-from app.crud.comment import create_comment
+from app.crud.comment import create_comment, get_comments_by_movie_id
 from app.crud.director import (
     create_director,
     get_directors,
@@ -603,3 +603,17 @@ async def comment_movie(
         raise HTTPException(status_code=404, detail=str(e))
 
     return comment
+
+
+@router.get(
+    "/movies/{movie_id}/comments",
+    status_code=200,
+    response_model=list[CommentResponseModel]
+)
+async def movie_comments(
+        movie_id: int,
+        db: AsyncSession = Depends(get_db),
+):
+    comments = await get_comments_by_movie_id(movie_id, db)
+
+    return comments
