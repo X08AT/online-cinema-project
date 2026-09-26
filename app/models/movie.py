@@ -223,6 +223,10 @@ class MovieComment(Base):
         onupdate=func.now()
     )
 
+    @property
+    def likes_count(self) -> int:
+        return len(self.likes)
+
     movie: Mapped[Movie] = relationship(
         "Movie",
         back_populates="comments"
