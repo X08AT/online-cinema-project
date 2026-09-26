@@ -45,7 +45,7 @@ from app.schemas.movie import (
     NamedEntityResponseModel,
     NamedEntityCreateModel,
     MovieResponseModel,
-    MovieCreateModel, MovieUpdateModel
+    MovieCreateModel, MovieUpdateModel, GenreWithCountResponseModel
 )
 
 router = APIRouter()
@@ -69,7 +69,7 @@ async def genre_create(
 @router.get(
     "/genres",
     status_code=200,
-    response_model=list[NamedEntityResponseModel]
+    response_model=list[GenreWithCountResponseModel]
 )
 async def genres_list(db: AsyncSession = Depends(get_db)):
     genres = await get_genres(db)
