@@ -14,7 +14,7 @@ from app.crud.certification import (
 from app.crud.comment import (
     create_comment,
     get_comments_by_movie_id,
-    update_comment, delete_comment, create_reply, like_comment
+    update_comment, delete_comment, create_reply, like_comment, remove_like
 )
 from app.crud.director import (
     create_director,
@@ -688,14 +688,29 @@ async def reply_on_comment(
 )
 async def comment_like(
         comment_id: int,
-        user: User = Depends(get_current_user),
+        current_user: User = Depends(get_current_user),
         db: AsyncSession = Depends(get_db)
 ):
     try:
-        await like_comment(comment_id, user.id, db)
+        await like_comment(comment_id, current_user.id, db)
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
     except FileExistsError as e:
         raise HTTPException(status_code=409, detail=str(e))
 
     return {"message": "Comment liked successfully"}
+
+
+@router.delete(
+    "/comments/{comment_id}/like",
+    status_code=204,
+)
+async def remove_comment_like(
+        comment_id: int,
+        current_user: User = Depends(get_current_user),
+        db: AsyncSession = Depends(get_db)
+):
+    try:
+        await remove_like(comment_id, current_user.id, db)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
