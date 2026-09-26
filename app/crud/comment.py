@@ -37,7 +37,8 @@ async def get_comments_by_movie_id(
     result = await db.execute(
         select(MovieComment)
         .options(
-            selectinload(MovieComment.replies)
+            selectinload(MovieComment.likes),
+            selectinload(MovieComment.replies).selectinload(MovieComment.likes)
         )
         .where(
             MovieComment.movie_id == movie_id,
@@ -133,7 +134,8 @@ async def get_comment_by_id(
     result = await db.execute(
         select(MovieComment)
         .options(
-            selectinload(MovieComment.replies)
+            selectinload(MovieComment.likes),
+            selectinload(MovieComment.replies).selectinload(MovieComment.likes)
         )
         .where(MovieComment.id == comment_id)
     )
