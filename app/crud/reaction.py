@@ -1,7 +1,7 @@
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.movie import MovieReaction, ReactionEnum
+from app.models.movie import MovieReaction, ReactionEnum, Movie
 from app.models.user import User
 
 
@@ -11,6 +11,15 @@ async def set_movie_reaction(
         user: User,
         db: AsyncSession
 ) -> None:
+    result = await db.execute(
+        select(Movie).where(Movie.id == movie_id)
+    )
+
+    movie = result.scalar_one_or_none()
+
+    if movie is None:
+        raise ValueError("Movie not found")
+
     result = await db.execute(
         select(MovieReaction)
         .where(
@@ -39,6 +48,15 @@ async def remove_movie_reaction(
         user: User,
         db: AsyncSession
 ) -> bool:
+    result = await db.execute(
+        select(Movie).where(Movie.id == movie_id)
+    )
+
+    movie = result.scalar_one_or_none()
+
+    if movie is None:
+        raise ValueError("Movie not found")
+
     result = await db.execute(
         select(MovieReaction)
         .where(
