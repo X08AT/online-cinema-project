@@ -170,3 +170,25 @@ async def like_comment(
 
     db.add(new_comment_like)
     await db.commit()
+
+
+async def remove_like(
+        comment_id: int,
+        user_id: int,
+        db: AsyncSession
+) -> None:
+    result = await db.execute(
+        select(CommentLike)
+        .where(
+            CommentLike.comment_id == comment_id,
+            CommentLike.user_id == user_id
+        )
+    )
+
+    liked = result.scalar_one_or_none()
+
+    if liked is None:
+        raise ValueError("Like not found")
+
+    await db.delete(liked)
+    await db.commit()
