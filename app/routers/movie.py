@@ -31,6 +31,7 @@ from app.crud.movie import (
     get_movie_by_id,
     update_movie, delete_movie, get_movies_by_genre
 )
+from app.crud.reaction import set_movie_reaction
 from app.crud.star import (
     create_star,
     get_stars,
@@ -38,7 +39,8 @@ from app.crud.star import (
     update_star,
     delete_star
 )
-from app.db.dependencies import get_db, require_moderator
+from app.db.dependencies import get_db, require_moderator, get_current_user
+from app.models.movie import ReactionEnum
 from app.models.user import User
 from app.schemas.movie import (
     NamedEntityUpdateModel,
@@ -528,3 +530,25 @@ async def movie_list_by_genre(
     movies = await get_movies_by_genre(genre_id, db)
 
     return movies
+
+
+@router.post("/movies/{movie_id}/like", status_code=201)
+async def like_movie(
+        movie_id: int,
+        current_user: User = Depends(get_current_user),
+        db: AsyncSession = Depends(get_db)
+):
+    await set_movie_reaction(movie_id, ReactionEnum.LIKE, current_user, db)
+
+    return {"message": "Movie liked successfully"}
+
+
+@router.post("/movies/{movie_id}/dislike", status_code=201)
+async def dislike_movie(
+        movie_id: int,
+        current_user: User = Depends(get_current_user),
+        db: AsyncSession = Depends(get_db)
+):
+    await set_movie_reaction(movie_id, ReactionEnum.DISLIKE, current_user, db)
+
+    return {"message": "Movie disliked successfully"}
