@@ -2,7 +2,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from app.models.movie import MovieComment, Movie
+from app.models.movie import MovieComment, Movie, CommentLike
 from app.schemas.movie import CommentCreateModel, CommentUpdateModel
 
 
@@ -139,3 +139,34 @@ async def get_comment_by_id(
     )
 
     return result.scalar_one_or_none()
+
+
+async def like_comment(
+        comment_id: int,
+        user_id: int,
+        db: AsyncSession
+) -> None:
+    comment = await get_comment_by_id(comment_id, db)
+
+    if comment is None:
+        raise ValueError("Comment not found")
+
+    result = await db.execute(
+        select(CommentLike)
+        .where(
+            CommentLike.comment_id == comment_id,
+            CommentLike.user_id == user_id)
+    )
+
+    comment_like = result.scalar_one_or_none()
+
+    if comment_like is not None:
+        raise FileExistsError("Comment already liked")
+
+    new_comment_like = CommentLike(
+        user_id=user_id,
+        comment_id=comment_id,
+    )
+
+    db.add(new_comment_like)
+    await db.commit()
