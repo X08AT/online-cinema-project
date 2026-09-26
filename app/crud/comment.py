@@ -2,7 +2,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.movie import MovieComment, Movie
-from app.schemas.movie import CommentCreateModel
+from app.schemas.movie import CommentCreateModel, CommentUpdateModel
 
 
 async def create_comment(
@@ -45,3 +45,30 @@ async def get_comments_by_movie_id(
     comments = result.scalars().all()
 
     return comments
+
+
+async def update_comment(
+        comment_id: int,
+        user_id: int,
+        data: CommentUpdateModel,
+        db: AsyncSession
+) -> MovieComment:
+    result = await db.execute(
+        select(MovieComment)
+        .where(MovieComment.id == comment_id)
+    )
+
+    comment = result.scalar_one_or_none()
+
+    if comment is None:
+        raise ValueError("Comment not found")
+
+    if comment.user_id != user_id:
+        raise PermissionError("Not your comment")
+
+    comment.content = data.content
+
+    await db.commit()
+    await db.refresh(comment)
+
+    return comment
