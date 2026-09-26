@@ -198,3 +198,14 @@ async def delete_movie(movie_id: int, db: AsyncSession) -> bool:
     await db.commit()
 
     return True
+
+
+async def get_movies_by_genre(genre_id: int, db: AsyncSession) -> list[Movie]:
+    result = await db.execute(
+        select(Movie)
+        .where(Movie.genres.any(Genre.id == genre_id))
+    )
+
+    movies = result.scalars().all()
+
+    return movies
