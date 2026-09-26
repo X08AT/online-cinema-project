@@ -538,7 +538,10 @@ async def like_movie(
         current_user: User = Depends(get_current_user),
         db: AsyncSession = Depends(get_db)
 ):
-    await set_movie_reaction(movie_id, ReactionEnum.LIKE, current_user, db)
+    try:
+        await set_movie_reaction(movie_id, ReactionEnum.LIKE, current_user, db)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
 
     return {"message": "Movie liked successfully"}
 
@@ -549,8 +552,15 @@ async def dislike_movie(
         current_user: User = Depends(get_current_user),
         db: AsyncSession = Depends(get_db)
 ):
-    await set_movie_reaction(movie_id, ReactionEnum.DISLIKE, current_user, db)
-
+    try:
+        await set_movie_reaction(
+            movie_id,
+            ReactionEnum.DISLIKE,
+            current_user,
+            db
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
     return {"message": "Movie disliked successfully"}
 
 
@@ -560,7 +570,10 @@ async def delete_movie_reaction(
         current_user: User = Depends(get_current_user),
         db: AsyncSession = Depends(get_db)
 ):
-    deleted = await remove_movie_reaction(movie_id, current_user, db)
+    try:
+        deleted = await remove_movie_reaction(movie_id, current_user, db)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
 
     if not deleted:
         raise HTTPException(status_code=404, detail="Movie reaction not found")
