@@ -1,5 +1,6 @@
 from sqlalchemy import select, or_
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from app.models.movie import Movie, Genre, Star, Director, Certification
 from app.schemas.movie import MovieCreateModel, MovieUpdateModel
@@ -75,7 +76,9 @@ async def get_movies(
         sort_order: str = "asc",
         search: str | None = None
 ) -> list[Movie]:
-    query = select(Movie)
+    query = select(Movie).options(
+        selectinload(Movie.reactions)
+    )
 
     if year is not None:
         query = query.where(Movie.year == year)
@@ -117,7 +120,11 @@ async def get_movies(
 
 
 async def get_movie_by_id(movie_id: int, db: AsyncSession) -> Movie | None:
-    result = await db.execute(select(Movie).where(Movie.id == movie_id))
+    result = await db.execute(
+        select(Movie)
+        .options(selectinload(Movie.reactions))
+        .where(Movie.id == movie_id)
+    )
 
     movie = result.scalar_one_or_none()
 
@@ -203,6 +210,7 @@ async def delete_movie(movie_id: int, db: AsyncSession) -> bool:
 async def get_movies_by_genre(genre_id: int, db: AsyncSession) -> list[Movie]:
     result = await db.execute(
         select(Movie)
+        .options(selectinload(Movie.reactions))
         .where(Movie.genres.any(Genre.id == genre_id))
     )
 
