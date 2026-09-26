@@ -11,6 +11,7 @@ from app.crud.certification import (
     update_certification,
     delete_certification
 )
+from app.crud.comment import create_comment
 from app.crud.director import (
     create_director,
     get_directors,
@@ -47,7 +48,11 @@ from app.schemas.movie import (
     NamedEntityResponseModel,
     NamedEntityCreateModel,
     MovieResponseModel,
-    MovieCreateModel, MovieUpdateModel, GenreWithCountResponseModel
+    MovieCreateModel,
+    MovieUpdateModel,
+    GenreWithCountResponseModel,
+    CommentResponseModel,
+    CommentCreateModel
 )
 
 router = APIRouter()
@@ -579,3 +584,22 @@ async def delete_movie_reaction(
         raise HTTPException(status_code=404, detail="Movie reaction not found")
 
     return {"message": "Movie reaction deleted successfully"}
+
+
+@router.post(
+    "/movies/{movie_id}/comments",
+    status_code=201,
+    response_model=CommentResponseModel
+)
+async def comment_movie(
+        data: CommentCreateModel,
+        movie_id: int,
+        current_user: User = Depends(get_current_user),
+        db: AsyncSession = Depends(get_db)
+):
+    try:
+        comment = await create_comment(current_user.id, movie_id, data, db)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+    return comment
