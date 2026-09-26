@@ -19,6 +19,10 @@ class NamedEntityUpdateModel(NamedEntityCreateModel):
     pass
 
 
+class GenreWithCountResponseModel(NamedEntityResponseModel):
+    movie_count: int
+
+
 class MovieCreateModel(BaseModel):
     name: str = Field(min_length=1)
     year: int = Field(ge=1888)
