@@ -56,7 +56,7 @@ from app.schemas.movie import (
     MovieUpdateModel,
     GenreWithCountResponseModel,
     CommentResponseModel,
-    CommentCreateModel, CommentUpdateModel
+    CommentCreateModel, CommentUpdateModel, ReplyResponseModel
 )
 
 router = APIRouter()
@@ -666,7 +666,7 @@ async def comment_delete(
 @router.post(
     "/comments/{comment_id}/replies",
     status_code=201,
-    response_model=CommentResponseModel
+    response_model=ReplyResponseModel
 )
 async def reply_on_comment(
         comment_id: int,
