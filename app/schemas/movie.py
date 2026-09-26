@@ -71,5 +71,7 @@ class MovieResponseModel(BaseModel):
     genres: list[NamedEntityResponseModel]
     stars: list[NamedEntityResponseModel]
     directors: list[NamedEntityResponseModel]
+    likes_count: int
+    dislikes_count: int
 
     model_config = ConfigDict(from_attributes=True)
