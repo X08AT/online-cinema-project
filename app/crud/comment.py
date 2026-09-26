@@ -72,3 +72,25 @@ async def update_comment(
     await db.refresh(comment)
 
     return comment
+
+
+async def delete_comment(
+        comment_id: int,
+        user_id: int,
+        db: AsyncSession
+) -> None:
+    result = await db.execute(
+        select(MovieComment)
+        .where(MovieComment.id == comment_id)
+    )
+
+    comment = result.scalar_one_or_none()
+
+    if comment is None:
+        raise ValueError("Comment not found")
+
+    if comment.user_id != user_id:
+        raise PermissionError("Not your comment")
+
+    await db.delete(comment)
+    await db.commit()
