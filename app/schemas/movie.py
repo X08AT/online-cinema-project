@@ -1,7 +1,8 @@
+from datetime import datetime
 from decimal import Decimal
 from uuid import UUID
 
-from pydantic import BaseModel, Field, ConfigDict
+from pydantic import BaseModel, Field, ConfigDict, field_validator
 
 
 class NamedEntityResponseModel(BaseModel):
@@ -73,5 +74,35 @@ class MovieResponseModel(BaseModel):
     directors: list[NamedEntityResponseModel]
     likes_count: int
     dislikes_count: int
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class CommentCreateModel(BaseModel):
+    content: str = Field(min_length=4)
+
+    @field_validator("content")
+    @classmethod
+    def validate_content(cls, value: str) -> str:
+        value = value.strip()
+
+        if len(value) < 4:
+            raise ValueError("Comment must contain at least 4 characters")
+
+        return value
+
+
+class CommentUpdateModel(CommentCreateModel):
+    pass
+
+
+class CommentResponseModel(BaseModel):
+    id: int
+    user_id: int
+    movie_id: int
+    parent_id: int | None = None
+    content: str
+    created_at: datetime
+    updated_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
