@@ -88,6 +88,22 @@ class Movie(Base):
         ForeignKey("certifications.id")
     )
 
+    @property
+    def likes_count(self) -> int:
+        return sum(
+            1
+            for reaction in self.reactions
+            if reaction.reaction == ReactionEnum.LIKE
+        )
+
+    @property
+    def dislikes_count(self) -> int:
+        return sum(
+            1
+            for reaction in self.reactions
+            if reaction.reaction == ReactionEnum.DISLIKE
+        )
+
     certification: Mapped[Certification] = relationship(
         "Certification",
         back_populates="movies"
