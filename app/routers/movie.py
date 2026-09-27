@@ -14,7 +14,11 @@ from app.crud.certification import (
 from app.crud.comment import (
     create_comment,
     get_comments_by_movie_id,
-    update_comment, delete_comment, create_reply, like_comment, remove_like
+    update_comment,
+    delete_comment,
+    create_reply,
+    like_comment,
+    remove_like
 )
 from app.crud.director import (
     create_director,
@@ -36,6 +40,7 @@ from app.crud.movie import (
     get_movie_by_id,
     update_movie, delete_movie, get_movies_by_genre
 )
+from app.crud.rating import set_movie_rating
 from app.crud.reaction import set_movie_reaction, remove_movie_reaction
 from app.crud.star import (
     create_star,
@@ -56,7 +61,10 @@ from app.schemas.movie import (
     MovieUpdateModel,
     GenreWithCountResponseModel,
     CommentResponseModel,
-    CommentCreateModel, CommentUpdateModel, ReplyResponseModel
+    CommentCreateModel,
+    CommentUpdateModel,
+    ReplyResponseModel,
+    MovieRatingModel
 )
 
 router = APIRouter()
@@ -714,3 +722,18 @@ async def remove_comment_like(
         await remove_like(comment_id, current_user.id, db)
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
+
+
+@router.patch("/movies/{movie_id}/rating", status_code=200)
+async def rate_movie(
+        movie_id: int,
+        data: MovieRatingModel,
+        current_user: User = Depends(get_current_user),
+        db: AsyncSession = Depends(get_db)
+):
+    try:
+        await set_movie_rating(movie_id, current_user.id, data, db)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+    return {"message": "Movie rated successfully"}
