@@ -21,6 +21,7 @@ from app.models.movie import (
     MovieReaction,
     MovieComment,
     CommentLike,
+    MovieRating,
 )
 from app.models.user import (
     UserGroup,
