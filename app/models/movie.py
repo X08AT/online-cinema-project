@@ -139,6 +139,10 @@ class Movie(Base):
         "MovieComment",
         back_populates="movie",
     )
+    ratings: Mapped[List["MovieRating"]] = relationship(
+        "MovieRating",
+        back_populates="movie",
+    )
 
 
 class MovieGenre(Base):
@@ -266,3 +270,22 @@ class CommentLike(Base):
         "MovieComment",
         back_populates="likes"
     )
+
+
+class MovieRating(Base):
+    __tablename__ = "movie_ratings"
+
+    __table_args__ = (
+        UniqueConstraint("user_id", "movie_id"),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    movie_id: Mapped[int] = mapped_column(ForeignKey("movies.id"))
+    rating: Mapped[int] = mapped_column()
+
+    user: Mapped["User"] = relationship(
+        "User",
+        back_populates="movies_ratings"
+    )
+    movie: Mapped["Movie"] = relationship("Movie", back_populates="ratings")
