@@ -38,9 +38,15 @@ from app.crud.movie import (
     create_movie,
     get_movies,
     get_movie_by_id,
-    update_movie, delete_movie, get_movies_by_genre
+    update_movie,
+    delete_movie,
+    get_movies_by_genre
 )
-from app.crud.rating import set_movie_rating, delete_movie_rating
+from app.crud.rating import (
+    set_movie_rating,
+    delete_movie_rating,
+    get_movie_ratings
+)
 from app.crud.reaction import set_movie_reaction, remove_movie_reaction
 from app.crud.star import (
     create_star,
@@ -64,7 +70,7 @@ from app.schemas.movie import (
     CommentCreateModel,
     CommentUpdateModel,
     ReplyResponseModel,
-    MovieRatingModel
+    MovieRatingModel, MovieRatingResponseModel
 )
 
 router = APIRouter()
@@ -749,3 +755,21 @@ async def delete_rating(
         await delete_movie_rating(movie_id, current_user.id, db)
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
+
+
+@router.get(
+    "/movies/{movie_id}/ratings",
+    status_code=200,
+    response_model=MovieRatingResponseModel
+)
+async def get_ratings(
+        movie_id: int,
+        current_user: User = Depends(get_current_user),
+        db: AsyncSession = Depends(get_db)
+):
+    try:
+        movie_ratings = await get_movie_ratings(movie_id, current_user.id, db)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+    return movie_ratings
