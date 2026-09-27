@@ -121,3 +121,7 @@ class ReplyResponseModel(BaseModel):
     likes_count: int
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class MovieRatingModel(BaseModel):
+    rating: int = Field(ge=1, le=10)
