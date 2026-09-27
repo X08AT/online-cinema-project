@@ -40,7 +40,7 @@ from app.crud.movie import (
     get_movie_by_id,
     update_movie, delete_movie, get_movies_by_genre
 )
-from app.crud.rating import set_movie_rating
+from app.crud.rating import set_movie_rating, delete_movie_rating
 from app.crud.reaction import set_movie_reaction, remove_movie_reaction
 from app.crud.star import (
     create_star,
@@ -737,3 +737,15 @@ async def rate_movie(
         raise HTTPException(status_code=404, detail=str(e))
 
     return {"message": "Movie rated successfully"}
+
+
+@router.delete("/movies/{movie_id}/rating", status_code=204)
+async def delete_rating(
+        movie_id: int,
+        current_user: User = Depends(get_current_user),
+        db: AsyncSession = Depends(get_db)
+):
+    try:
+        await delete_movie_rating(movie_id, current_user.id, db)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
