@@ -43,3 +43,32 @@ async def set_movie_rating(
     await db.refresh(rating)
 
     return rating
+
+
+async def delete_movie_rating(
+        movie_id: int,
+        user_id: int,
+        db: AsyncSession
+) -> None:
+    result = await db.execute(select(Movie).where(Movie.id == movie_id))
+
+    movie = result.scalar_one_or_none()
+
+    if movie is None:
+        raise ValueError("Movie not found")
+
+    result = await db.execute(
+        select(MovieRating)
+        .where(
+            MovieRating.movie_id == movie_id,
+            MovieRating.user_id == user_id
+        )
+    )
+
+    rating = result.scalar_one_or_none()
+
+    if rating is None:
+        raise ValueError("Rating not found")
+
+    await db.delete(rating)
+    await db.commit()
