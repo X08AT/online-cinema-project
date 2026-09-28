@@ -42,7 +42,7 @@ from app.crud.movie import (
     delete_movie,
     get_movies_by_genre
 )
-from app.crud.notification import get_notifications
+from app.crud.notification import get_notifications, read_notification
 from app.crud.rating import (
     set_movie_rating,
     delete_movie_rating,
@@ -788,3 +788,17 @@ async def notifications_list(
     notifications = await get_notifications(current_user.id, db)
 
     return notifications
+
+
+@router.patch("/notifications/{notification_id}", status_code=200,)
+async def notification_read(
+        notification_id: int,
+        current_user: User = Depends(get_current_user),
+        db: AsyncSession = Depends(get_db)
+):
+    try:
+        await read_notification(current_user.id, notification_id, db)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+    return {"message": "Notification read successfully"}
