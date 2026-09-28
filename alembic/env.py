@@ -23,6 +23,7 @@ from app.models.movie import (
     CommentLike,
     MovieRating,
     Notification,
+    Favorite,
 )
 from app.models.user import (
     UserGroup,
