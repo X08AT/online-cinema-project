@@ -4,6 +4,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, Field, ConfigDict, field_validator
 
+from app.models.movie import NotificationTypeEnum
+
 
 class NamedEntityResponseModel(BaseModel):
     id: int
@@ -131,3 +133,14 @@ class MovieRatingResponseModel(BaseModel):
     average_rating: float | None = None
     ratings_count: int
     user_rating: int | None = None
+
+
+class NotificationResponseModel(BaseModel):
+    id: int
+    user_id: int
+    comment_id: int
+    notification_type: NotificationTypeEnum
+    is_read: bool
+    created_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
