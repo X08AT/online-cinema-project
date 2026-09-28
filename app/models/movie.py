@@ -23,6 +23,11 @@ class ReactionEnum(str, Enum):
     DISLIKE = "dislike"
 
 
+class NotificationTypeEnum(str, Enum):
+    COMMENT_LIKED = "comment_liked"
+    COMMENT_REPLY = "comment_reply"
+
+
 class Genre(Base):
     __tablename__ = "genres"
 
@@ -252,6 +257,10 @@ class MovieComment(Base):
         "CommentLike",
         back_populates="comment"
     )
+    notifications: Mapped[List["Notification"]] = relationship(
+        "Notification",
+        back_populates="comment"
+    )
 
 
 class CommentLike(Base):
@@ -289,3 +298,28 @@ class MovieRating(Base):
         back_populates="movies_ratings"
     )
     movie: Mapped["Movie"] = relationship("Movie", back_populates="ratings")
+
+
+class Notification(Base):
+    __tablename__ = "notifications"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    comment_id: Mapped[int] = mapped_column(ForeignKey("movie_comments.id"))
+    notification_type: Mapped[NotificationTypeEnum] = mapped_column(
+        SQLEnum(NotificationTypeEnum)
+    )
+    is_read: Mapped[bool] = mapped_column(default=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now()
+    )
+
+    user: Mapped["User"] = relationship(
+        "User",
+        back_populates="notifications"
+    )
+    comment: Mapped["MovieComment"] = relationship(
+        "MovieComment",
+        back_populates="notifications"
+    )

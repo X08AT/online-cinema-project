@@ -77,6 +77,10 @@ class User(Base):
         "MovieRating",
         back_populates="user"
     )
+    notifications: Mapped[List["Notification"]] = relationship(
+        "Notification",
+        back_populates="user"
+    )
 
 
 class UserProfile(Base):
