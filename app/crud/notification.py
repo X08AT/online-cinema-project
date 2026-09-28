@@ -15,3 +15,25 @@ async def get_notifications(
     )
 
     return result.scalars().all()
+
+
+async def read_notification(
+        user_id: int,
+        notification_id: int,
+        db: AsyncSession
+) -> None:
+    result = await db.execute(
+        select(Notification).where(
+            Notification.id == notification_id,
+            Notification.user_id == user_id
+        )
+    )
+
+    notification = result.scalar_one_or_none()
+
+    if notification is None:
+        raise ValueError("Notification not found")
+
+    notification.is_read = True
+
+    await db.commit()
