@@ -2,7 +2,13 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from app.models.movie import MovieComment, Movie, CommentLike
+from app.models.movie import (
+    MovieComment,
+    Movie,
+    CommentLike,
+    Notification,
+    NotificationTypeEnum
+)
 from app.schemas.movie import CommentCreateModel, CommentUpdateModel
 
 
@@ -121,7 +127,18 @@ async def create_reply(
         parent_id=comment_id,
         **data.model_dump()
     )
+
     db.add(reply)
+
+    if user_id != comment.user_id:
+        notification = Notification(
+            user_id=comment.user_id,
+            comment_id=comment_id,
+            notification_type=NotificationTypeEnum.COMMENT_REPLY,
+        )
+
+        db.add(notification)
+
     await db.commit()
 
     return await get_comment_by_id(reply.id, db)
@@ -171,6 +188,16 @@ async def like_comment(
     )
 
     db.add(new_comment_like)
+
+    if user_id != comment.user_id:
+        notification = Notification(
+            user_id=comment.user_id,
+            comment_id=comment_id,
+            notification_type=NotificationTypeEnum.COMMENT_LIKED,
+        )
+
+        db.add(notification)
+
     await db.commit()
 
 
