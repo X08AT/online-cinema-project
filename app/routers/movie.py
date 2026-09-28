@@ -42,6 +42,7 @@ from app.crud.movie import (
     delete_movie,
     get_movies_by_genre
 )
+from app.crud.notification import get_notifications
 from app.crud.rating import (
     set_movie_rating,
     delete_movie_rating,
@@ -70,7 +71,7 @@ from app.schemas.movie import (
     CommentCreateModel,
     CommentUpdateModel,
     ReplyResponseModel,
-    MovieRatingModel, MovieRatingResponseModel
+    MovieRatingModel, MovieRatingResponseModel, NotificationResponseModel
 )
 
 router = APIRouter()
@@ -773,3 +774,17 @@ async def get_ratings(
         raise HTTPException(status_code=404, detail=str(e))
 
     return movie_ratings
+
+
+@router.get(
+    "/notifications",
+    status_code=200,
+    response_model=list[NotificationResponseModel]
+)
+async def notifications_list(
+        current_user: User = Depends(get_current_user),
+        db: AsyncSession = Depends(get_db)
+):
+    notifications = await get_notifications(current_user.id, db)
+
+    return notifications
