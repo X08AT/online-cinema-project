@@ -148,6 +148,10 @@ class Movie(Base):
         "MovieRating",
         back_populates="movie",
     )
+    favorites: Mapped[List["Favorite"]] = relationship(
+        "Favorite",
+        back_populates="movie",
+    )
 
 
 class MovieGenre(Base):
@@ -322,4 +326,29 @@ class Notification(Base):
     comment: Mapped["MovieComment"] = relationship(
         "MovieComment",
         back_populates="notifications"
+    )
+
+
+class Favorite(Base):
+    __tablename__ = "favorites"
+
+    __table_args__ = (
+        UniqueConstraint("user_id", "movie_id"),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    movie_id: Mapped[int] = mapped_column(ForeignKey("movies.id"))
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now()
+    )
+
+    user: Mapped["User"] = relationship(
+        "User",
+        back_populates="favorites"
+    )
+    movie: Mapped["Movie"] = relationship(
+        "Movie",
+        back_populates="favorites"
     )

@@ -81,6 +81,10 @@ class User(Base):
         "Notification",
         back_populates="user"
     )
+    favorites: Mapped[List["Favorite"]] = relationship(
+        "Favorite",
+        back_populates="user"
+    )
 
 
 class UserProfile(Base):
