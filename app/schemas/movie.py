@@ -144,3 +144,12 @@ class NotificationResponseModel(BaseModel):
     created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class FavoriteResponseModel(BaseModel):
+    id: int
+    user_id: int
+    movie_id: int
+    created_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
