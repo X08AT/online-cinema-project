@@ -27,6 +27,7 @@ from app.crud.director import (
     update_director,
     delete_director
 )
+from app.crud.favorite import favorite_movie_by_id
 from app.crud.genre import (
     create_genre,
     get_genres,
@@ -71,7 +72,10 @@ from app.schemas.movie import (
     CommentCreateModel,
     CommentUpdateModel,
     ReplyResponseModel,
-    MovieRatingModel, MovieRatingResponseModel, NotificationResponseModel
+    MovieRatingModel,
+    MovieRatingResponseModel,
+    NotificationResponseModel,
+    FavoriteResponseModel
 )
 
 router = APIRouter()
@@ -802,3 +806,23 @@ async def notification_read(
         raise HTTPException(status_code=404, detail=str(e))
 
     return {"message": "Notification read successfully"}
+
+
+@router.post(
+    "/movies/{movie_id}/favorite",
+    status_code=201,
+    response_model=FavoriteResponseModel
+)
+async def favorite_movie(
+        movie_id: int,
+        current_user: User = Depends(get_current_user),
+        db: AsyncSession = Depends(get_db)
+):
+    try:
+        favorite = await favorite_movie_by_id(current_user.id, movie_id, db)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except FileExistsError as e:
+        raise HTTPException(status_code=409, detail=str(e))
+
+    return favorite
