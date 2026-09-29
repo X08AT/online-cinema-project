@@ -19,7 +19,7 @@ from app.models.user import (
     RefreshToken,
     PasswordResetToken,
 )
-from app.schemas.auth import (
+from app.schemas.user.auth import (
     RegistrationModel,
     ResendActivationTokenModel,
     LoginModel,

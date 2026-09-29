@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.models.movie import Movie, Genre, Star, Director, Certification
-from app.schemas.movie import MovieCreateModel, MovieUpdateModel
+from app.schemas.movie.movie import MovieUpdateModel, MovieCreateModel
 
 
 async def create_movie(

@@ -9,7 +9,7 @@ from app.models.movie import (
     Notification,
     NotificationTypeEnum
 )
-from app.schemas.movie import CommentCreateModel, CommentUpdateModel
+from app.schemas.movie.comment import CommentCreateModel, CommentUpdateModel
 
 
 async def create_comment(

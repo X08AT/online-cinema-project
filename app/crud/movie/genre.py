@@ -2,7 +2,10 @@ from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.movie import Genre, MovieGenre
-from app.schemas.movie import NamedEntityCreateModel, NamedEntityUpdateModel
+from app.schemas.movie.movie import (
+    NamedEntityCreateModel,
+    NamedEntityUpdateModel
+)
 
 
 async def create_genre(

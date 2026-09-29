@@ -2,7 +2,10 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.movie import Star
-from app.schemas.movie import NamedEntityCreateModel, NamedEntityUpdateModel
+from app.schemas.movie.movie import (
+    NamedEntityCreateModel,
+    NamedEntityUpdateModel
+)
 
 
 async def create_star(data: NamedEntityCreateModel, db: AsyncSession) -> Star:

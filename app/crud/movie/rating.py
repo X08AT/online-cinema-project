@@ -2,7 +2,7 @@ from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.movie import Movie, MovieRating
-from app.schemas.movie import MovieRatingModel
+from app.schemas.movie.rating import MovieRatingModel
 
 
 async def set_movie_rating(

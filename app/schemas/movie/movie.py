@@ -1,10 +1,7 @@
-from datetime import datetime
 from decimal import Decimal
 from uuid import UUID
 
-from pydantic import BaseModel, Field, ConfigDict, field_validator
-
-from app.models.movie import NotificationTypeEnum
+from pydantic import BaseModel, Field, ConfigDict
 
 
 class NamedEntityResponseModel(BaseModel):
@@ -76,80 +73,5 @@ class MovieResponseModel(BaseModel):
     directors: list[NamedEntityResponseModel]
     likes_count: int
     dislikes_count: int
-
-    model_config = ConfigDict(from_attributes=True)
-
-
-class CommentCreateModel(BaseModel):
-    content: str = Field(min_length=4)
-
-    @field_validator("content")
-    @classmethod
-    def validate_content(cls, value: str) -> str:
-        value = value.strip()
-
-        if len(value) < 4:
-            raise ValueError("Comment must contain at least 4 characters")
-
-        return value
-
-
-class CommentUpdateModel(CommentCreateModel):
-    pass
-
-
-class CommentResponseModel(BaseModel):
-    id: int
-    user_id: int
-    movie_id: int
-    parent_id: int | None = None
-    content: str
-    created_at: datetime
-    updated_at: datetime
-    likes_count: int
-    replies: list["ReplyResponseModel"] = Field(default_factory=list)
-
-    model_config = ConfigDict(from_attributes=True)
-
-
-class ReplyResponseModel(BaseModel):
-    id: int
-    user_id: int
-    movie_id: int
-    parent_id: int | None
-    content: str
-    created_at: datetime
-    updated_at: datetime
-    likes_count: int
-
-    model_config = ConfigDict(from_attributes=True)
-
-
-class MovieRatingModel(BaseModel):
-    rating: int = Field(ge=1, le=10)
-
-
-class MovieRatingResponseModel(BaseModel):
-    average_rating: float | None = None
-    ratings_count: int
-    user_rating: int | None = None
-
-
-class NotificationResponseModel(BaseModel):
-    id: int
-    user_id: int
-    comment_id: int
-    notification_type: NotificationTypeEnum
-    is_read: bool
-    created_at: datetime
-
-    model_config = ConfigDict(from_attributes=True)
-
-
-class FavoriteResponseModel(BaseModel):
-    id: int
-    user_id: int
-    movie_id: int
-    created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)

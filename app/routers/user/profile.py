@@ -1,14 +1,14 @@
 from fastapi import APIRouter, Depends, UploadFile, File, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.crud.profile import (
+from app.crud.user.profile import (
     get_profile_by_user_id,
     create_profile,
     update_profile
 )
 from app.db.dependencies import get_current_user, get_db
 from app.models.user import User
-from app.schemas.profile import (
+from app.schemas.user.profile import (
     ProfileCreateModel,
     ProfileResponseModel,
     ProfileUpdateModel
