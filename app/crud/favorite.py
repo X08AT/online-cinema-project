@@ -1,7 +1,8 @@
-from sqlalchemy import select
+from sqlalchemy import select, or_
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
-from app.models.movie import Movie, Favorite
+from app.models.movie import Movie, Favorite, Star, Director
 
 
 async def favorite_movie_by_id(
@@ -71,3 +72,65 @@ async def remove_movie_from_favorite(
 
     await db.delete(favorite)
     await db.commit()
+
+
+async def favorite_movies_list(
+        user_id: int,
+        db: AsyncSession,
+        skip: int,
+        limit: int,
+        year: int | None = None,
+        imdb: float | None = None,
+        sort_by: str | None = None,
+        sort_order: str = "asc",
+        search: str | None = None
+) -> list[Movie]:
+    query = (
+        select(Movie)
+        .options(
+            selectinload(Movie.certification),
+            selectinload(Movie.genres),
+            selectinload(Movie.stars),
+            selectinload(Movie.directors),
+            selectinload(Movie.reactions),
+        )
+        .join(Favorite)
+        .where(Favorite.user_id == user_id))
+
+    if year is not None:
+        query = query.where(Movie.year == year)
+
+    if imdb is not None:
+        query = query.where(Movie.imdb >= imdb)
+
+    sort_fields = {
+        "price": Movie.price,
+        "year": Movie.year,
+        "votes": Movie.votes,
+    }
+
+    sort_column = sort_fields.get(sort_by)
+
+    if sort_column is not None:
+        if sort_order == "desc":
+            query = query.order_by(sort_column.desc())
+        else:
+            query = query.order_by(sort_column.asc())
+
+    if search is not None:
+        query = query.where(
+            or_(
+                Movie.name.ilike(f"%{search}%"),
+                Movie.description.ilike(f"%{search}%"),
+                Movie.stars.any(Star.name.ilike(f"%{search}%")),
+                Movie.directors.any(Director.name.ilike(f"%{search}%")),
+            )
+        )
+
+    query = query.offset(skip).limit(limit)
+
+    result = await db.execute(query)
+
+    movies = result.scalars().all()
+
+    return movies
