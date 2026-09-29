@@ -61,6 +61,30 @@ class User(Base):
     refresh_tokens: Mapped[List["RefreshToken"]] = relationship(
         "RefreshToken", back_populates="user"
     )
+    reactions: Mapped[List["MovieReaction"]] = relationship(
+        "MovieReaction",
+        back_populates="user"
+    )
+    comments: Mapped[List["MovieComment"]] = relationship(
+        "MovieComment",
+        back_populates="user"
+    )
+    comment_likes: Mapped[List["CommentLike"]] = relationship(
+        "CommentLike",
+        back_populates="user"
+    )
+    movies_ratings: Mapped[List["MovieRating"]] = relationship(
+        "MovieRating",
+        back_populates="user"
+    )
+    notifications: Mapped[List["Notification"]] = relationship(
+        "Notification",
+        back_populates="user"
+    )
+    favorites: Mapped[List["Favorite"]] = relationship(
+        "Favorite",
+        back_populates="user"
+    )
 
 
 class UserProfile(Base):

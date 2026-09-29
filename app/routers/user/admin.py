@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.dependencies import get_db, require_admin
 from app.models.user import User, UserGroup
-from app.schemas.admin import AdminChangeGroupModel
+from app.schemas.user.admin import AdminChangeGroupModel
 
 router = APIRouter()
 

@@ -9,6 +9,22 @@ from alembic import context
 
 from app.core.settings import settings
 from app.db.session import Base
+from app.models.movie import (
+    Genre,
+    Star,
+    Director,
+    Certification,
+    Movie,
+    MovieGenre,
+    MovieStar,
+    MovieDirector,
+    MovieReaction,
+    MovieComment,
+    CommentLike,
+    MovieRating,
+    Notification,
+    Favorite,
+)
 from app.models.user import (
     UserGroup,
     User,
