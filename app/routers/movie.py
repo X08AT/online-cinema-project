@@ -469,6 +469,39 @@ async def movie_create(
 
 
 @router.get(
+    "/movies/favorites",
+    status_code=200,
+    response_model=list[MovieResponseModel]
+)
+async def get_favorites(
+        current_user: User = Depends(get_current_user),
+        db: AsyncSession = Depends(get_db),
+        skip: int = Query(default=0, ge=0),
+        limit: int = Query(default=10, ge=1, le=100),
+        year: int | None = Query(default=None, ge=1888),
+        imdb: float | None = Query(default=None, ge=0, le=10),
+        sort_by: Literal["price", "year", "votes"] | None = Query(
+            default=None
+        ),
+        sort_order: Literal["asc", "desc"] = Query(default="asc"),
+        search: str | None = Query(default=None),
+):
+    movies = await favorite_movies_list(
+        current_user.id,
+        db,
+        skip,
+        limit,
+        year,
+        imdb,
+        sort_by,
+        sort_order,
+        search
+    )
+
+    return movies
+
+
+@router.get(
     "/movies",
     status_code=200,
     response_model=list[MovieResponseModel]
@@ -845,36 +878,3 @@ async def delete_favorite(
         await remove_movie_from_favorite(movie_id, current_user.id, db)
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
-
-
-@router.get(
-    "/movies/favorites",
-    status_code=200,
-    response_model=list[MovieResponseModel]
-)
-async def get_favorites(
-        current_user: User = Depends(get_current_user),
-        db: AsyncSession = Depends(get_db),
-        skip: int = Query(default=0, ge=0),
-        limit: int = Query(default=10, ge=1, le=100),
-        year: int | None = Query(default=None, ge=1888),
-        imdb: float | None = Query(default=None, ge=0, le=10),
-        sort_by: Literal["price", "year", "votes"] | None = Query(
-            default=None
-        ),
-        sort_order: Literal["asc", "desc"] = Query(default="asc"),
-        search: str | None = Query(default=None),
-):
-    movies = await favorite_movies_list(
-        current_user.id,
-        db,
-        skip,
-        limit,
-        year,
-        imdb,
-        sort_by,
-        sort_order,
-        search
-    )
-
-    return movies
