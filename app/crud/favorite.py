@@ -40,3 +40,34 @@ async def favorite_movie_by_id(
     await db.refresh(favorite)
 
     return favorite
+
+
+async def remove_movie_from_favorite(
+        movie_id: int,
+        user_id: int,
+        db: AsyncSession
+) -> None:
+    result = await db.execute(
+        select(Movie).where(Movie.id == movie_id)
+    )
+
+    movie = result.scalar_one_or_none()
+
+    if movie is None:
+        raise ValueError("Movie not found")
+
+    result = await db.execute(
+        select(Favorite)
+        .where(
+            Favorite.movie_id == movie_id,
+            Favorite.user_id == user_id
+        )
+    )
+
+    favorite = result.scalar_one_or_none()
+
+    if favorite is None:
+        raise ValueError("Favorite not found")
+
+    await db.delete(favorite)
+    await db.commit()
