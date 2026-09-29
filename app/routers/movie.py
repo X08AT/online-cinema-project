@@ -27,7 +27,7 @@ from app.crud.director import (
     update_director,
     delete_director
 )
-from app.crud.favorite import favorite_movie_by_id
+from app.crud.favorite import favorite_movie_by_id, remove_movie_from_favorite
 from app.crud.genre import (
     create_genre,
     get_genres,
@@ -826,3 +826,18 @@ async def favorite_movie(
         raise HTTPException(status_code=409, detail=str(e))
 
     return favorite
+
+
+@router.delete(
+    "/movies/{movie_id}/favorite",
+    status_code=204
+)
+async def delete_favorite(
+        movie_id: int,
+        current_user: User = Depends(get_current_user),
+        db: AsyncSession = Depends(get_db)
+):
+    try:
+        await remove_movie_from_favorite(movie_id, current_user.id, db)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
