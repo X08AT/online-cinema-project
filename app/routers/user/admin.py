@@ -7,7 +7,7 @@ from app.db.dependencies import get_db, require_admin
 from app.models.user import User, UserGroup
 from app.schemas.user.admin import AdminChangeGroupModel
 
-router = APIRouter()
+router = APIRouter(tags=["Admin"])
 
 
 @router.patch("/admin/users/{user_id}/group", status_code=200)

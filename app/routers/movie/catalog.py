@@ -22,7 +22,7 @@ from app.schemas.movie.movie import (
     MovieResponseModel
 )
 
-router = APIRouter()
+router = APIRouter(tags=["Catalog"])
 
 
 @router.get(

@@ -13,7 +13,7 @@ from app.models.user import User
 from app.schemas.movie.favorite import FavoriteResponseModel
 from app.schemas.movie.movie import MovieResponseModel
 
-router = APIRouter()
+router = APIRouter(tags=["Favorites"])
 
 
 @router.get(

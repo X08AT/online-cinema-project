@@ -15,7 +15,7 @@ from app.schemas.user.profile import (
 )
 from app.services.minio_service import upload_avatar
 
-router = APIRouter()
+router = APIRouter(tags=["Profile"])
 
 
 @router.post(

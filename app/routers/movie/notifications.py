@@ -6,7 +6,7 @@ from app.db.dependencies import get_current_user, get_db
 from app.models.user import User
 from app.schemas.movie.notification import NotificationResponseModel
 
-router = APIRouter()
+router = APIRouter(tags=["Notifications"])
 
 
 @router.get(

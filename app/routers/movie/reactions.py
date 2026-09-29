@@ -6,7 +6,7 @@ from app.db.dependencies import get_db, get_current_user
 from app.models.movie import ReactionEnum
 from app.models.user import User
 
-router = APIRouter()
+router = APIRouter(tags=["Reactions"])
 
 
 @router.post("/movies/{movie_id}/like", status_code=201)

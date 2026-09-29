@@ -25,7 +25,7 @@ from app.schemas.movie.movie import (
     NamedEntityCreateModel
 )
 
-router = APIRouter()
+router = APIRouter(tags=["Management"])
 
 
 @router.post(

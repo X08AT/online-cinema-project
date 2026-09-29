@@ -19,7 +19,7 @@ from app.schemas.movie.comment import (
     CommentUpdateModel
 )
 
-router = APIRouter()
+router = APIRouter(tags=["Comments"])
 
 
 @router.post(

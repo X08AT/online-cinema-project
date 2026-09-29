@@ -31,7 +31,7 @@ from app.schemas.user.auth import (
 )
 from app.services.email_service import send_email
 
-router = APIRouter()
+router = APIRouter(tags=["Authentication"])
 
 
 @router.post("/auth/register", status_code=201)

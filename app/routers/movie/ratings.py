@@ -10,7 +10,7 @@ from app.db.dependencies import get_db, get_current_user
 from app.models.user import User
 from app.schemas.movie.rating import MovieRatingModel, MovieRatingResponseModel
 
-router = APIRouter()
+router = APIRouter(tags=["Ratings"])
 
 
 @router.patch("/movies/{movie_id}/rating", status_code=200)
