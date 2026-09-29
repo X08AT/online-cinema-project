@@ -7,10 +7,18 @@ from app.db.dependencies import get_db, require_admin
 from app.models.user import User, UserGroup
 from app.schemas.user.admin import AdminChangeGroupModel
 
-router = APIRouter()
+router = APIRouter(tags=["Admin"])
 
 
-@router.patch("/admin/users/{user_id}/group", status_code=200)
+@router.patch(
+    "/admin/users/{user_id}/group",
+    status_code=200,
+    summary="Change user group",
+    description=(
+        "Changes the group of a specified user. "
+        "This operation is available only to administrators."
+    ),
+)
 async def admin_update_group(
         user_id: int,
         data: AdminChangeGroupModel,
@@ -39,7 +47,15 @@ async def admin_update_group(
     return {"message": "User group changed successfully"}
 
 
-@router.patch("/admin/users/{user_id}/activate", status_code=200)
+@router.patch(
+    "/admin/users/{user_id}/activate",
+    status_code=200,
+    summary="Activate user account",
+    description=(
+        "Manually activates a specified user account. "
+        "This operation is available only to administrators."
+    ),
+)
 async def admin_activate_user(
         user_id: int,
         db: AsyncSession = Depends(get_db),

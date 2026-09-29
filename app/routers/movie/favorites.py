@@ -13,13 +13,18 @@ from app.models.user import User
 from app.schemas.movie.favorite import FavoriteResponseModel
 from app.schemas.movie.movie import MovieResponseModel
 
-router = APIRouter()
+router = APIRouter(tags=["Favorites"])
 
 
 @router.get(
     "/movies/favorites",
     status_code=200,
-    response_model=list[MovieResponseModel]
+    response_model=list[MovieResponseModel],
+    summary="Get favorite movies",
+    description=(
+        "Returns the authenticated user's favorite movies. "
+        "Supports pagination, filtering, sorting, and searching."
+    ),
 )
 async def get_favorites(
         current_user: User = Depends(get_current_user),
@@ -52,7 +57,11 @@ async def get_favorites(
 @router.post(
     "/movies/{movie_id}/favorite",
     status_code=201,
-    response_model=FavoriteResponseModel
+    response_model=FavoriteResponseModel,
+    summary="Add movie to favorites",
+    description=(
+        "Adds the specified movie to the authenticated user's favorites."
+    ),
 )
 async def favorite_movie(
         movie_id: int,
@@ -71,7 +80,11 @@ async def favorite_movie(
 
 @router.delete(
     "/movies/{movie_id}/favorite",
-    status_code=204
+    status_code=204,
+    summary="Remove movie from favorites",
+    description=(
+        "Removes the specified movie from the authenticated user's favorites."
+    ),
 )
 async def delete_favorite(
         movie_id: int,

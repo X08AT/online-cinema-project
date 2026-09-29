@@ -6,10 +6,18 @@ from app.db.dependencies import get_db, get_current_user
 from app.models.movie import ReactionEnum
 from app.models.user import User
 
-router = APIRouter()
+router = APIRouter(tags=["Reactions"])
 
 
-@router.post("/movies/{movie_id}/like", status_code=201)
+@router.post(
+    "/movies/{movie_id}/like",
+    status_code=201,
+    summary="Like movie",
+    description=(
+        "Adds a like reaction from the authenticated user "
+        "to the specified movie."
+    ),
+)
 async def like_movie(
         movie_id: int,
         current_user: User = Depends(get_current_user),
@@ -23,7 +31,15 @@ async def like_movie(
     return {"message": "Movie liked successfully"}
 
 
-@router.post("/movies/{movie_id}/dislike", status_code=201)
+@router.post(
+    "/movies/{movie_id}/dislike",
+    status_code=201,
+    summary="Dislike movie",
+    description=(
+        "Adds a dislike reaction from the authenticated user "
+        "to the specified movie."
+    ),
+)
 async def dislike_movie(
         movie_id: int,
         current_user: User = Depends(get_current_user),
@@ -41,7 +57,15 @@ async def dislike_movie(
     return {"message": "Movie disliked successfully"}
 
 
-@router.delete("/movies/{movie_id}/reaction", status_code=200)
+@router.delete(
+    "/movies/{movie_id}/reaction",
+    status_code=200,
+    summary="Remove movie reaction",
+    description=(
+        "Removes the authenticated user's existing reaction "
+        "from the specified movie."
+    ),
+)
 async def delete_movie_reaction(
         movie_id: int,
         current_user: User = Depends(get_current_user),

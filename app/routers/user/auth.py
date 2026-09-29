@@ -31,10 +31,19 @@ from app.schemas.user.auth import (
 )
 from app.services.email_service import send_email
 
-router = APIRouter()
+router = APIRouter(tags=["Authentication"])
 
 
-@router.post("/auth/register", status_code=201)
+@router.post(
+    "/auth/register",
+    status_code=201,
+    summary="Register a new user",
+    description=(
+        "Creates a new inactive user account and sends an activation link "
+        "to the provided email address."
+        " The activation link is valid for 24 hours."
+    ),
+)
 async def register(
         data: RegistrationModel,
         db: AsyncSession = Depends(get_db)
@@ -101,7 +110,15 @@ async def register(
     }
 
 
-@router.get("/auth/activate", status_code=200)
+@router.get(
+    "/auth/activate",
+    status_code=200,
+    summary="Activate user account",
+    description=(
+        "Activates a user account using the activation token sent by email. "
+        "The token must exist and must not be expired."
+    ),
+)
 async def activate(
         token: str,
         db: AsyncSession = Depends(get_db)
@@ -136,7 +153,16 @@ async def activate(
     return {"message": "Account activated"}
 
 
-@router.post("/auth/resend-activation", status_code=200)
+@router.post(
+    "/auth/resend-activation",
+    status_code=200,
+    summary="Resend activation email",
+    description=(
+        "Generates a new activation token for"
+        " an inactive user and sends a new "
+        "activation link by email. The new link is valid for 24 hours."
+    ),
+)
 async def resend_activation(
     data: ResendActivationTokenModel,
     db: AsyncSession = Depends(get_db)
@@ -201,7 +227,15 @@ async def resend_activation(
     return {"message": "Activation email sent"}
 
 
-@router.post("/auth/login", status_code=200)
+@router.post(
+    "/auth/login",
+    status_code=200,
+    summary="Log in user",
+    description=(
+        "Authenticates an active user with email and password and returns "
+        "an access token and a refresh token."
+    ),
+)
 async def login(data: LoginModel, db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(User).where(User.email == data.email))
 
@@ -229,7 +263,14 @@ async def login(data: LoginModel, db: AsyncSession = Depends(get_db)):
     return {"access_token": access_token, "refresh_token": refresh_token.token}
 
 
-@router.post("/auth/refresh", status_code=200)
+@router.post(
+    "/auth/refresh",
+    status_code=200,
+    summary="Refresh access token",
+    description=(
+        "Creates a new access token using a valid, non-expired refresh token."
+    ),
+)
 async def refresh_token(
         data: TokenRefreshModel,
         db: AsyncSession = Depends(get_db)
@@ -259,7 +300,14 @@ async def refresh_token(
     return {"access_token": new_access_token}
 
 
-@router.post("/auth/logout", status_code=200)
+@router.post(
+    "/auth/logout",
+    status_code=200,
+    summary="Log out user",
+    description=(
+        "Logs out the user by deleting the provided refresh token."
+    ),
+)
 async def logout(data: LogoutModel, db: AsyncSession = Depends(get_db)):
     result = await db.execute(
         select(RefreshToken).where(RefreshToken.token == data.refresh_token)
@@ -279,7 +327,15 @@ async def logout(data: LogoutModel, db: AsyncSession = Depends(get_db)):
     return {"message": "You have been logged out"}
 
 
-@router.post("/auth/change-password", status_code=200)
+@router.post(
+    "/auth/change-password",
+    status_code=200,
+    summary="Change user password",
+    description=(
+        "Changes the authenticated user's password"
+        " after verifying the current password."
+    ),
+)
 async def change_password(
     data: ChangePasswordModel,
     current_user: User = Depends(get_current_user),
@@ -297,7 +353,16 @@ async def change_password(
     return {"message": "Password changed"}
 
 
-@router.post("/auth/password-reset/request", status_code=200)
+@router.post(
+    "/auth/password-reset/request",
+    status_code=200,
+    summary="Request password reset",
+    description=(
+        "Generates a password reset token for"
+        " an active user and sends a reset link "
+        "to the user's email address. The link is valid for 24 hours."
+    ),
+)
 async def password_reset_request(
     data: ResetPasswordRequestModel, db: AsyncSession = Depends(get_db)
 ):
@@ -354,7 +419,15 @@ async def password_reset_request(
     }
 
 
-@router.post("/auth/password-reset/confirm", status_code=200)
+@router.post(
+    "/auth/password-reset/confirm",
+    status_code=200,
+    summary="Reset user password",
+    description=(
+        "Resets the user's password using a valid,"
+        " non-expired password reset token."
+    ),
+)
 async def password_reset(
         token: str,
         data: ResetPasswordModel,

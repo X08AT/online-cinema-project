@@ -25,13 +25,18 @@ from app.schemas.movie.movie import (
     NamedEntityCreateModel
 )
 
-router = APIRouter()
+router = APIRouter(tags=["Management"])
 
 
 @router.post(
     "/genres",
     status_code=201,
-    response_model=NamedEntityResponseModel
+    response_model=NamedEntityResponseModel,
+    summary="Create genre",
+    description=(
+        "Creates a new movie genre. "
+        "This operation is available only to moderators."
+    ),
 )
 async def genre_create(
         data: NamedEntityCreateModel,
@@ -46,7 +51,12 @@ async def genre_create(
 @router.patch(
     "/genres/{genre_id}",
     status_code=200,
-    response_model=NamedEntityResponseModel
+    response_model=NamedEntityResponseModel,
+    summary="Update genre",
+    description=(
+        "Updates an existing movie genre by its ID. "
+        "This operation is available only to moderators."
+    ),
 )
 async def genre_update(
         data: NamedEntityUpdateModel,
@@ -62,7 +72,15 @@ async def genre_update(
     return genre
 
 
-@router.delete("/genres/{genre_id}", status_code=200)
+@router.delete(
+    "/genres/{genre_id}",
+    status_code=200,
+    summary="Delete genre",
+    description=(
+        "Deletes an existing movie genre by its ID. "
+        "This operation is available only to moderators."
+    ),
+)
 async def genre_delete(
         genre_id: int,
         db: AsyncSession = Depends(get_db),
@@ -79,7 +97,12 @@ async def genre_delete(
 @router.post(
     "/stars",
     status_code=201,
-    response_model=NamedEntityResponseModel
+    response_model=NamedEntityResponseModel,
+    summary="Create star",
+    description=(
+        "Creates a new movie star. "
+        "This operation is available only to moderators."
+    ),
 )
 async def star_create(
     data: NamedEntityCreateModel,
@@ -94,7 +117,12 @@ async def star_create(
 @router.patch(
     "/stars/{star_id}",
     status_code=200,
-    response_model=NamedEntityResponseModel
+    response_model=NamedEntityResponseModel,
+    summary="Update star",
+    description=(
+        "Updates an existing movie star by their ID. "
+        "This operation is available only to moderators."
+    ),
 )
 async def star_update(
     data: NamedEntityUpdateModel,
@@ -115,7 +143,12 @@ async def star_update(
 
 @router.delete(
     "/stars/{star_id}",
-    status_code=200
+    status_code=200,
+    summary="Delete star",
+    description=(
+        "Deletes an existing movie star by their ID. "
+        "This operation is available only to moderators."
+    ),
 )
 async def star_delete(
     star_id: int,
@@ -136,7 +169,12 @@ async def star_delete(
 @router.post(
     "/directors",
     status_code=201,
-    response_model=NamedEntityResponseModel
+    response_model=NamedEntityResponseModel,
+    summary="Create director",
+    description=(
+        "Creates a new movie director. "
+        "This operation is available only to moderators."
+    ),
 )
 async def director_create(
     data: NamedEntityCreateModel,
@@ -151,7 +189,12 @@ async def director_create(
 @router.patch(
     "/directors/{director_id}",
     status_code=200,
-    response_model=NamedEntityResponseModel
+    response_model=NamedEntityResponseModel,
+    summary="Update director",
+    description=(
+        "Updates an existing movie director by their ID. "
+        "This operation is available only to moderators."
+    ),
 )
 async def director_update(
     data: NamedEntityUpdateModel,
@@ -176,7 +219,12 @@ async def director_update(
 
 @router.delete(
     "/directors/{director_id}",
-    status_code=200
+    status_code=200,
+    summary="Delete director",
+    description=(
+        "Deletes an existing movie director by their ID. "
+        "This operation is available only to moderators."
+    ),
 )
 async def director_delete(
     director_id: int,
@@ -200,7 +248,12 @@ async def director_delete(
 @router.post(
     "/certifications",
     status_code=201,
-    response_model=NamedEntityResponseModel
+    response_model=NamedEntityResponseModel,
+    summary="Create certification",
+    description=(
+        "Creates a new movie certification. "
+        "This operation is available only to moderators."
+    ),
 )
 async def certification_create(
     data: NamedEntityCreateModel,
@@ -218,7 +271,12 @@ async def certification_create(
 @router.patch(
     "/certifications/{certification_id}",
     status_code=200,
-    response_model=NamedEntityResponseModel
+    response_model=NamedEntityResponseModel,
+    summary="Update certification",
+    description=(
+        "Updates an existing movie certification by its ID. "
+        "This operation is available only to moderators."
+    ),
 )
 async def certification_update(
     data: NamedEntityUpdateModel,
@@ -243,7 +301,12 @@ async def certification_update(
 
 @router.delete(
     "/certifications/{certification_id}",
-    status_code=200
+    status_code=200,
+    summary="Delete certification",
+    description=(
+        "Deletes an existing movie certification by its ID. "
+        "This operation is available only to moderators."
+    ),
 )
 async def certification_delete(
     certification_id: int,
@@ -269,7 +332,12 @@ async def certification_delete(
 @router.post(
     "/movies",
     status_code=201,
-    response_model=MovieResponseModel
+    response_model=MovieResponseModel,
+    summary="Create movie",
+    description=(
+        "Creates a new movie with the provided information. "
+        "This operation is available only to moderators."
+    ),
 )
 async def movie_create(
         data: MovieCreateModel,
@@ -287,7 +355,12 @@ async def movie_create(
 @router.patch(
     "/movies/{movie_id}",
     status_code=200,
-    response_model=MovieResponseModel
+    response_model=MovieResponseModel,
+    summary="Update movie",
+    description=(
+        "Updates an existing movie by its ID. "
+        "This operation is available only to moderators."
+    ),
 )
 async def movie_update(
         movie_id: int,
@@ -308,7 +381,12 @@ async def movie_update(
 
 @router.delete(
     "/movies/{movie_id}",
-    status_code=200
+    status_code=200,
+    summary="Delete movie",
+    description=(
+        "Deletes an existing movie by its ID. "
+        "This operation is available only to moderators."
+    ),
 )
 async def movie_delete(
         movie_id: int,

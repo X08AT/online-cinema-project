@@ -19,13 +19,18 @@ from app.schemas.movie.comment import (
     CommentUpdateModel
 )
 
-router = APIRouter()
+router = APIRouter(tags=["Comments"])
 
 
 @router.post(
     "/movies/{movie_id}/comments",
     status_code=201,
-    response_model=CommentResponseModel
+    response_model=CommentResponseModel,
+    summary="Add comment to movie",
+    description=(
+        "Creates a new comment for the specified movie. "
+        "The user must be authenticated."
+    ),
 )
 async def comment_movie(
         data: CommentCreateModel,
@@ -44,7 +49,11 @@ async def comment_movie(
 @router.get(
     "/movies/{movie_id}/comments",
     status_code=200,
-    response_model=list[CommentResponseModel]
+    response_model=list[CommentResponseModel],
+    summary="Get movie comments",
+    description=(
+        "Returns all comments associated with the specified movie."
+    ),
 )
 async def movie_comments(
         movie_id: int,
@@ -58,7 +67,12 @@ async def movie_comments(
 @router.patch(
     "/comments/{comment_id}",
     status_code=200,
-    response_model=CommentResponseModel
+    response_model=CommentResponseModel,
+    summary="Update comment",
+    description=(
+        "Updates an existing comment. "
+        "Only the author of the comment can update it."
+    ),
 )
 async def comment_update(
         comment_id: int,
@@ -79,6 +93,11 @@ async def comment_update(
 @router.delete(
     "/comments/{comment_id}",
     status_code=200,
+    summary="Delete comment",
+    description=(
+        "Deletes an existing comment. "
+        "Only the author of the comment can delete it."
+    ),
 )
 async def comment_delete(
         comment_id: int,
@@ -98,7 +117,12 @@ async def comment_delete(
 @router.post(
     "/comments/{comment_id}/replies",
     status_code=201,
-    response_model=ReplyResponseModel
+    response_model=ReplyResponseModel,
+    summary="Reply to comment",
+    description=(
+        "Creates a reply to the specified comment. "
+        "The user must be authenticated."
+    ),
 )
 async def reply_on_comment(
         comment_id: int,
@@ -117,6 +141,10 @@ async def reply_on_comment(
 @router.post(
     "/comments/{comment_id}/like",
     status_code=201,
+    summary="Like comment",
+    description=(
+        "Adds a like from the authenticated user to the specified comment."
+    ),
 )
 async def comment_like(
         comment_id: int,
@@ -136,6 +164,10 @@ async def comment_like(
 @router.delete(
     "/comments/{comment_id}/like",
     status_code=204,
+    summary="Remove comment like",
+    description=(
+        "Removes the authenticated user's like from the specified comment."
+    ),
 )
 async def remove_comment_like(
         comment_id: int,

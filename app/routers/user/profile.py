@@ -15,13 +15,18 @@ from app.schemas.user.profile import (
 )
 from app.services.minio_service import upload_avatar
 
-router = APIRouter()
+router = APIRouter(tags=["Profile"])
 
 
 @router.post(
     "/profile",
     status_code=201,
-    response_model=ProfileResponseModel
+    response_model=ProfileResponseModel,
+    summary="Create user profile",
+    description=(
+        "Creates a profile for the authenticated user with personal "
+        "information and an avatar."
+    ),
 )
 async def profile_create(
         data: ProfileCreateModel = Depends(ProfileCreateModel.as_form),
@@ -44,7 +49,11 @@ async def profile_create(
 @router.get(
     "/profile",
     status_code=200,
-    response_model=ProfileResponseModel
+    response_model=ProfileResponseModel,
+    summary="Get user profile",
+    description=(
+        "Returns the profile of the currently authenticated user."
+    ),
 )
 async def get_profile(
         current_user: User = Depends(get_current_user),
@@ -58,7 +67,15 @@ async def get_profile(
     return profile
 
 
-@router.patch("/profile", response_model=ProfileResponseModel)
+@router.patch(
+    "/profile",
+    response_model=ProfileResponseModel,
+    summary="Update user profile",
+    description=(
+        "Updates the profile of the currently authenticated user. "
+        "The avatar can optionally be replaced."
+    ),
+)
 async def profile_update(
         data: ProfileUpdateModel = Depends(ProfileUpdateModel.as_form),
         avatar: UploadFile | None = File(None),

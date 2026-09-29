@@ -10,10 +10,18 @@ from app.db.dependencies import get_db, get_current_user
 from app.models.user import User
 from app.schemas.movie.rating import MovieRatingModel, MovieRatingResponseModel
 
-router = APIRouter()
+router = APIRouter(tags=["Ratings"])
 
 
-@router.patch("/movies/{movie_id}/rating", status_code=200)
+@router.patch(
+    "/movies/{movie_id}/rating",
+    status_code=200,
+    summary="Rate movie",
+    description=(
+        "Sets or updates the authenticated user's rating for the "
+        "specified movie."
+    ),
+)
 async def rate_movie(
         movie_id: int,
         data: MovieRatingModel,
@@ -28,7 +36,14 @@ async def rate_movie(
     return {"message": "Movie rated successfully"}
 
 
-@router.delete("/movies/{movie_id}/rating", status_code=204)
+@router.delete(
+    "/movies/{movie_id}/rating",
+    status_code=204,
+    summary="Delete movie rating",
+    description=(
+        "Deletes the authenticated user's rating for the specified movie."
+    ),
+)
 async def delete_rating(
         movie_id: int,
         current_user: User = Depends(get_current_user),
@@ -43,7 +58,12 @@ async def delete_rating(
 @router.get(
     "/movies/{movie_id}/ratings",
     status_code=200,
-    response_model=MovieRatingResponseModel
+    response_model=MovieRatingResponseModel,
+    summary="Get movie ratings",
+    description=(
+        "Returns rating information for the specified movie, including "
+        "rating data related to the authenticated user."
+    ),
 )
 async def get_ratings(
         movie_id: int,

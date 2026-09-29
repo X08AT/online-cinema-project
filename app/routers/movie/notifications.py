@@ -6,13 +6,17 @@ from app.db.dependencies import get_current_user, get_db
 from app.models.user import User
 from app.schemas.movie.notification import NotificationResponseModel
 
-router = APIRouter()
+router = APIRouter(tags=["Notifications"])
 
 
 @router.get(
     "/notifications",
     status_code=200,
-    response_model=list[NotificationResponseModel]
+    response_model=list[NotificationResponseModel],
+    summary="Get notifications",
+    description=(
+        "Returns all notifications for the currently authenticated user."
+    ),
 )
 async def notifications_list(
         current_user: User = Depends(get_current_user),
@@ -23,7 +27,15 @@ async def notifications_list(
     return notifications
 
 
-@router.patch("/notifications/{notification_id}", status_code=200)
+@router.patch(
+    "/notifications/{notification_id}",
+    status_code=200,
+    summary="Mark notification as read",
+    description=(
+        "Marks the specified notification as read for the currently "
+        "authenticated user."
+    ),
+)
 async def notification_read(
         notification_id: int,
         current_user: User = Depends(get_current_user),

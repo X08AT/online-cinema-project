@@ -22,13 +22,18 @@ from app.schemas.movie.movie import (
     MovieResponseModel
 )
 
-router = APIRouter()
+router = APIRouter(tags=["Catalog"])
 
 
 @router.get(
     "/genres",
     status_code=200,
-    response_model=list[GenreWithCountResponseModel]
+    response_model=list[GenreWithCountResponseModel],
+    summary="Get genres",
+    description=(
+        "Returns a list of all available movie genres "
+        "with the number of movies in each genre."
+    ),
 )
 async def genres_list(db: AsyncSession = Depends(get_db)):
     genres = await get_genres(db)
@@ -39,7 +44,11 @@ async def genres_list(db: AsyncSession = Depends(get_db)):
 @router.get(
     "/genres/{genre_id}",
     status_code=200,
-    response_model=NamedEntityResponseModel
+    response_model=NamedEntityResponseModel,
+    summary="Get genre by ID",
+    description=(
+        "Returns a specific movie genre by its ID."
+    ),
 )
 async def genre_get_by_id(genre_id: int, db: AsyncSession = Depends(get_db)):
     genre = await get_genre_by_id(genre_id, db)
@@ -53,7 +62,11 @@ async def genre_get_by_id(genre_id: int, db: AsyncSession = Depends(get_db)):
 @router.get(
     "/stars",
     status_code=200,
-    response_model=list[NamedEntityResponseModel]
+    response_model=list[NamedEntityResponseModel],
+    summary="Get stars",
+    description=(
+        "Returns a list of all available movie stars."
+    ),
 )
 async def stars_list(
     db: AsyncSession = Depends(get_db)
@@ -66,7 +79,11 @@ async def stars_list(
 @router.get(
     "/stars/{star_id}",
     status_code=200,
-    response_model=NamedEntityResponseModel
+    response_model=NamedEntityResponseModel,
+    summary="Get star by ID",
+    description=(
+        "Returns a specific movie star by their ID."
+    ),
 )
 async def star_get_by_id(
     star_id: int,
@@ -86,7 +103,11 @@ async def star_get_by_id(
 @router.get(
     "/directors",
     status_code=200,
-    response_model=list[NamedEntityResponseModel]
+    response_model=list[NamedEntityResponseModel],
+    summary="Get directors",
+    description=(
+        "Returns a list of all available movie directors."
+    ),
 )
 async def directors_list(
     db: AsyncSession = Depends(get_db)
@@ -99,7 +120,11 @@ async def directors_list(
 @router.get(
     "/directors/{director_id}",
     status_code=200,
-    response_model=NamedEntityResponseModel
+    response_model=NamedEntityResponseModel,
+    summary="Get director by ID",
+    description=(
+        "Returns a specific movie director by their ID."
+    ),
 )
 async def director_get_by_id(
     director_id: int,
@@ -119,7 +144,11 @@ async def director_get_by_id(
 @router.get(
     "/certifications",
     status_code=200,
-    response_model=list[NamedEntityResponseModel]
+    response_model=list[NamedEntityResponseModel],
+    summary="Get certifications",
+    description=(
+        "Returns a list of all available movie certifications."
+    ),
 )
 async def certifications_list(
     db: AsyncSession = Depends(get_db)
@@ -132,7 +161,11 @@ async def certifications_list(
 @router.get(
     "/certifications/{certification_id}",
     status_code=200,
-    response_model=NamedEntityResponseModel
+    response_model=NamedEntityResponseModel,
+    summary="Get certification by ID",
+    description=(
+        "Returns a specific movie certification by its ID."
+    ),
 )
 async def certification_get_by_id(
     certification_id: int,
@@ -155,7 +188,13 @@ async def certification_get_by_id(
 @router.get(
     "/movies",
     status_code=200,
-    response_model=list[MovieResponseModel]
+    response_model=list[MovieResponseModel],
+    summary="Get movies",
+    description=(
+        "Returns a paginated list of movies. Supports filtering by year "
+        "and IMDb rating, sorting by price, year, or popularity, and "
+        "searching by movie-related information."
+    ),
 )
 async def movies_list(
     db: AsyncSession = Depends(get_db),
@@ -184,7 +223,11 @@ async def movies_list(
 @router.get(
     "/movies/{movie_id}",
     status_code=200,
-    response_model=MovieResponseModel
+    response_model=MovieResponseModel,
+    summary="Get movie by ID",
+    description=(
+        "Returns detailed information about a specific movie by its ID."
+    ),
 )
 async def movie_get_by_id(movie_id: int, db: AsyncSession = Depends(get_db)):
     movie = await get_movie_by_id(movie_id, db)
@@ -198,7 +241,11 @@ async def movie_get_by_id(movie_id: int, db: AsyncSession = Depends(get_db)):
 @router.get(
     "/genres/{genre_id}/movies",
     status_code=200,
-    response_model=list[MovieResponseModel]
+    response_model=list[MovieResponseModel],
+    summary="Get movies by genre",
+    description=(
+        "Returns a list of movies associated with the specified genre."
+    ),
 )
 async def movie_list_by_genre(
         genre_id: int,
