@@ -21,7 +21,7 @@ from app.models.movie import (
     Star,
     Certification,
     Movie,
-    MovieComment
+    MovieComment, Notification, NotificationTypeEnum
 )
 from app.models.user import (
     UserGroup,
@@ -535,6 +535,23 @@ async def second_auth_headers(second_active_user):
     return {
         "Authorization": f"Bearer {token}"
     }
+
+
+@pytest_asyncio.fixture
+async def notification(active_user):
+    async with TestSessionLocal() as session:
+        notification = Notification(
+            user_id=active_user.id,
+            type=NotificationTypeEnum.COMMENT_LIKED,
+            message="Your comment was liked",
+            is_read=False,
+        )
+
+        session.add(notification)
+        await session.commit()
+        await session.refresh(notification)
+
+        yield notification
 
 
 @pytest_asyncio.fixture
