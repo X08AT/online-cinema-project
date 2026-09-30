@@ -538,12 +538,12 @@ async def second_auth_headers(second_active_user):
 
 
 @pytest_asyncio.fixture
-async def notification(active_user):
+async def notification(active_user, comment):
     async with TestSessionLocal() as session:
         notification = Notification(
             user_id=active_user.id,
-            type=NotificationTypeEnum.COMMENT_LIKED,
-            message="Your comment was liked",
+            comment_id=comment.id,
+            notification_type=NotificationTypeEnum.COMMENT_LIKED,
             is_read=False,
         )
 
