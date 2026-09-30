@@ -63,7 +63,6 @@ async def create_test_tables():
         table_names = ", ".join(
             f'"{table.name}"'
             for table in Base.metadata.sorted_tables
-            if table.name != "user_groups"
         )
 
         await connection.execute(
