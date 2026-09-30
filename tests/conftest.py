@@ -15,7 +15,14 @@ from app.core.settings import settings
 from app.db.dependencies import get_db
 from app.db.session import Base
 from app.main import app
-from app.models.movie import Genre, Director, Star, Certification, Movie, MovieComment
+from app.models.movie import (
+    Genre,
+    Director,
+    Star,
+    Certification,
+    Movie,
+    MovieComment
+)
 from app.models.user import (
     UserGroup,
     UserGroupEnum,
@@ -483,6 +490,50 @@ async def moderator_auth_headers(moderator_user):
 
     return {
         "Authorization": f"Bearer {access_token}"
+    }
+
+
+@pytest_asyncio.fixture
+async def comment(active_user, movie):
+    async with TestSessionLocal() as session:
+        comment = MovieComment(
+            user_id=active_user.id,
+            movie_id=movie.id,
+            content="Test comment",
+        )
+
+        session.add(comment)
+        await session.commit()
+        await session.refresh(comment)
+
+        yield comment
+
+
+@pytest_asyncio.fixture
+async def second_active_user(user_group):
+    async with TestSessionLocal() as session:
+        user = User(
+            email="second@example.com",
+            hashed_password=hash_password("Password123!"),
+            is_active=True,
+            group_id=user_group.id,
+        )
+
+        session.add(user)
+        await session.commit()
+        await session.refresh(user)
+
+        yield user
+
+
+@pytest_asyncio.fixture
+async def second_auth_headers(second_active_user):
+    token = create_access_token(
+        {"sub": str(second_active_user.id)}
+    )
+
+    return {
+        "Authorization": f"Bearer {token}"
     }
 
 
