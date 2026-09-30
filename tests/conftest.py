@@ -3,7 +3,7 @@ from decimal import Decimal
 
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
-from sqlalchemy import NullPool
+from sqlalchemy import NullPool, select, text
 from sqlalchemy.ext.asyncio import (
     create_async_engine,
     async_sessionmaker,
@@ -60,16 +60,35 @@ async def create_test_tables():
     yield
 
     async with test_engine.begin() as connection:
-        await connection.run_sync(Base.metadata.drop_all)
+        table_names = ", ".join(
+            f'"{table.name}"'
+            for table in Base.metadata.sorted_tables
+            if table.name != "user_groups"
+        )
+
+        await connection.execute(
+            text(
+                f"TRUNCATE TABLE {table_names} "
+                "RESTART IDENTITY CASCADE"
+            )
+        )
 
 
 @pytest_asyncio.fixture
 async def user_group():
     async with TestSessionLocal() as session:
-        group = UserGroup(name=UserGroupEnum.USER.value)
+        result = await session.execute(
+            select(UserGroup).where(
+                UserGroup.name == UserGroupEnum.USER.value
+            )
+        )
+        group = result.scalar_one_or_none()
 
-        session.add(group)
-        await session.commit()
+        if group is None:
+            group = UserGroup(name=UserGroupEnum.USER.value)
+            session.add(group)
+            await session.commit()
+            await session.refresh(group)
 
         yield group
 
@@ -240,14 +259,18 @@ async def inactive_user_password_reset_token(inactive_user):
 @pytest_asyncio.fixture
 async def admin_group():
     async with TestSessionLocal() as session:
-        group = UserGroup(
-            name=UserGroupEnum.ADMIN.value,
+        result = await session.execute(
+            select(UserGroup).where(
+                UserGroup.name == UserGroupEnum.ADMIN.value
+            )
         )
+        group = result.scalar_one_or_none()
 
-        session.add(group)
-
-        await session.commit()
-        await session.refresh(group)
+        if group is None:
+            group = UserGroup(name=UserGroupEnum.ADMIN.value)
+            session.add(group)
+            await session.commit()
+            await session.refresh(group)
 
         yield group
 
@@ -454,13 +477,18 @@ async def movies(
 @pytest_asyncio.fixture
 async def moderator_group():
     async with TestSessionLocal() as session:
-        group = UserGroup(
-            name=UserGroupEnum.MODERATOR.value
+        result = await session.execute(
+            select(UserGroup).where(
+                UserGroup.name == UserGroupEnum.MODERATOR.value
+            )
         )
+        group = result.scalar_one_or_none()
 
-        session.add(group)
-        await session.commit()
-        await session.refresh(group)
+        if group is None:
+            group = UserGroup(name=UserGroupEnum.MODERATOR.value)
+            session.add(group)
+            await session.commit()
+            await session.refresh(group)
 
         yield group
 
