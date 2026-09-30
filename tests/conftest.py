@@ -88,7 +88,7 @@ async def active_user(user_group):
     async with TestSessionLocal() as session:
         hashed_password = hash_password("TestPassword123")
         user = User(
-            email="test@example.com",
+            email="active@example.com",
             hashed_password=hashed_password,
             is_active=True,
             group_id=user_group.id,
@@ -226,6 +226,46 @@ async def inactive_user_password_reset_token(inactive_user):
         await session.refresh(token)
 
         yield token
+
+
+@pytest_asyncio.fixture
+async def admin_group():
+    async with TestSessionLocal() as session:
+        group = UserGroup(
+            name=UserGroupEnum.ADMIN.value,
+        )
+
+        session.add(group)
+
+        await session.commit()
+        await session.refresh(group)
+
+        yield group
+
+
+@pytest_asyncio.fixture
+async def admin_user(admin_group):
+    async with TestSessionLocal() as session:
+        user = User(
+            email="Admin@example.com",
+            hashed_password=hash_password("TestPassword123"),
+            is_active=True,
+            group_id=admin_group.id,
+        )
+
+        session.add(user)
+
+        await session.commit()
+        await session.refresh(user)
+
+        yield user
+
+
+@pytest_asyncio.fixture
+async def admin_auth_headers(admin_user):
+    access_token = create_access_token({"sub": str(admin_user.id)})
+
+    yield {"Authorization": f"Bearer {access_token}"}
 
 
 @pytest_asyncio.fixture
