@@ -1,4 +1,5 @@
 from datetime import datetime, timezone, timedelta, date
+from decimal import Decimal
 
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
@@ -14,6 +15,7 @@ from app.core.settings import settings
 from app.db.dependencies import get_db
 from app.db.session import Base
 from app.main import app
+from app.models.movie import Genre, Director, Star, Certification, Movie
 from app.models.user import (
     UserGroup,
     UserGroupEnum,
@@ -287,6 +289,159 @@ async def profile(active_user):
         await session.refresh(profile)
 
         yield profile
+
+
+@pytest_asyncio.fixture
+async def genre():
+    async with TestSessionLocal() as session:
+        genre = Genre(name="Action")
+
+        session.add(genre)
+        await session.commit()
+        await session.refresh(genre)
+
+        yield genre
+
+
+@pytest_asyncio.fixture
+async def star():
+    async with TestSessionLocal() as session:
+        star = Star(name="Test Star")
+
+        session.add(star)
+        await session.commit()
+        await session.refresh(star)
+
+        yield star
+
+
+@pytest_asyncio.fixture
+async def director():
+    async with TestSessionLocal() as session:
+        director = Director(name="Test Director")
+
+        session.add(director)
+        await session.commit()
+        await session.refresh(director)
+
+        yield director
+
+
+@pytest_asyncio.fixture
+async def certification():
+    async with TestSessionLocal() as session:
+        certification = Certification(name="PG-13")
+
+        session.add(certification)
+        await session.commit()
+        await session.refresh(certification)
+
+        yield certification
+
+
+@pytest_asyncio.fixture
+async def movie(
+    genre,
+    star,
+    director,
+    certification,
+):
+    async with TestSessionLocal() as session:
+        genre = await session.merge(genre)
+        star = await session.merge(star)
+        director = await session.merge(director)
+        certification = await session.merge(certification)
+
+        movie = Movie(
+            name="Test Movie",
+            year=2025,
+            time=120,
+            imdb=8.5,
+            votes=1000,
+            meta_score=85,
+            gross=1000000,
+            description="Test movie description",
+            price=Decimal("9.99"),
+            certification=certification,
+            genres=[genre],
+            stars=[star],
+            directors=[director],
+        )
+
+        session.add(movie)
+        await session.commit()
+        await session.refresh(movie)
+
+        yield movie
+
+
+@pytest_asyncio.fixture
+async def movies(
+    genre,
+    star,
+    director,
+    certification,
+):
+    async with TestSessionLocal() as session:
+        genre = await session.merge(genre)
+        star = await session.merge(star)
+        director = await session.merge(director)
+
+        movies = [
+            Movie(
+                name="Interstellar",
+                year=2014,
+                time=169,
+                imdb=8.7,
+                votes=2000000,
+                meta_score=74,
+                gross=700000000,
+                description="Space exploration movie",
+                price=Decimal("15.99"),
+                certification_id=certification.id,
+                genres=[genre],
+                stars=[star],
+                directors=[director],
+            ),
+            Movie(
+                name="Inception",
+                year=2010,
+                time=148,
+                imdb=8.8,
+                votes=2500000,
+                meta_score=74,
+                gross=800000000,
+                description="Dream exploration movie",
+                price=Decimal("12.99"),
+                certification_id=certification.id,
+                genres=[genre],
+                stars=[star],
+                directors=[director],
+            ),
+            Movie(
+                name="Test Cheap Movie",
+                year=2020,
+                time=100,
+                imdb=6.5,
+                votes=500,
+                meta_score=60,
+                gross=100000,
+                description="Simple test movie",
+                price=Decimal("5.99"),
+                certification_id=certification.id,
+                genres=[genre],
+                stars=[star],
+                directors=[director],
+            ),
+        ]
+
+        session.add_all(movies)
+        await session.commit()
+
+        for movie in movies:
+            await session.refresh(movie)
+
+        yield movies
 
 
 @pytest_asyncio.fixture
