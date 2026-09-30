@@ -1,4 +1,4 @@
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timezone, timedelta, date
 
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
@@ -20,7 +20,7 @@ from app.models.user import (
     User,
     ActivationToken,
     RefreshToken,
-    PasswordResetToken,
+    PasswordResetToken, UserProfile, GenderEnum,
 )
 
 test_engine = create_async_engine(
@@ -266,6 +266,27 @@ async def admin_auth_headers(admin_user):
     access_token = create_access_token({"sub": str(admin_user.id)})
 
     yield {"Authorization": f"Bearer {access_token}"}
+
+
+@pytest_asyncio.fixture
+async def profile(active_user):
+    async with TestSessionLocal() as session:
+        profile = UserProfile(
+            user_id=active_user.id,
+            first_name="Test",
+            last_name="Profile",
+            avatar="test-avatar.jpg",
+            gender=GenderEnum.MAN,
+            date_of_birth=date(2007, 5, 8),
+            info="Test Profile",
+        )
+
+        session.add(profile)
+
+        await session.commit()
+        await session.refresh(profile)
+
+        yield profile
 
 
 @pytest_asyncio.fixture
