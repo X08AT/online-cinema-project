@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  code-quality-and-tests:
+    runs-on: ubuntu-latest
+
+    env:
+      TEST_DATABASE_URL: postgresql+asyncpg://user:password@localhost:5434/test_db
+      SECRET_KEY: test-secret-key
+      ALGORITHM: HS256
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+
+      - name: Install Poetry
+        run: pipx install poetry
+
+      - name: Install dependencies
+        run: poetry install --no-interaction
+
+      - name: Check formatting with Black
+        run: poetry run black --check .
+
+      - name: Run Flake8
+        run: poetry run flake8 .
+
+      - name: Run mypy
+        run: poetry run mypy app
+
+      - name: Start test database
+        run: docker compose up -d test_db
+
+      - name: Run tests with coverage
+        run: >
+          poetry run pytest
+          --cov=app
+          --cov-report=term-missing
+          --cov-fail-under=90
