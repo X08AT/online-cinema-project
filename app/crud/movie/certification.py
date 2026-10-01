@@ -2,15 +2,12 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.movie import Certification
-from app.schemas.movie.movie import (
-    NamedEntityCreateModel,
-    NamedEntityUpdateModel
-)
+from app.schemas.movie.movie import NamedEntityCreateModel, NamedEntityUpdateModel
 
 
 async def create_certification(
     data: NamedEntityCreateModel,
-    db: AsyncSession
+    db: AsyncSession,
 ) -> Certification:
     certification = Certification(**data.model_dump())
 
@@ -22,23 +19,21 @@ async def create_certification(
 
 
 async def get_certifications(
-    db: AsyncSession
+    db: AsyncSession,
 ) -> list[Certification]:
     result = await db.execute(select(Certification))
 
     certifications = result.scalars().all()
 
-    return certifications
+    return list(certifications)
 
 
 async def get_certification_by_id(
     certification_id: int,
-    db: AsyncSession
+    db: AsyncSession,
 ) -> Certification | None:
     result = await db.execute(
-        select(Certification).where(
-            Certification.id == certification_id
-        )
+        select(Certification).where(Certification.id == certification_id)
     )
 
     certification = result.scalar_one_or_none()
@@ -49,11 +44,11 @@ async def get_certification_by_id(
 async def update_certification(
     data: NamedEntityUpdateModel,
     certification_id: int,
-    db: AsyncSession
+    db: AsyncSession,
 ) -> Certification | None:
     certification = await get_certification_by_id(
         certification_id,
-        db
+        db,
     )
 
     if certification is None:
@@ -69,11 +64,11 @@ async def update_certification(
 
 async def delete_certification(
     certification_id: int,
-    db: AsyncSession
+    db: AsyncSession,
 ) -> bool:
     certification = await get_certification_by_id(
         certification_id,
-        db
+        db,
     )
 
     if certification is None:

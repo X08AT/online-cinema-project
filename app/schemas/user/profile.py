@@ -15,12 +15,12 @@ class ProfileCreateModel(BaseModel):
 
     @classmethod
     def as_form(
-            cls,
-            first_name: str | None = Form(None),
-            last_name: str | None = Form(None),
-            gender: GenderEnum | None = Form(None),
-            date_of_birth: date | None = Form(None),
-            info: str = Form(...),
+        cls,
+        first_name: str | None = Form(None),
+        last_name: str | None = Form(None),
+        gender: GenderEnum | None = Form(None),
+        date_of_birth: date | None = Form(None),
+        info: str = Form(...),
     ):
         return cls(
             first_name=first_name,
@@ -40,12 +40,12 @@ class ProfileUpdateModel(BaseModel):
 
     @classmethod
     def as_form(
-            cls,
-            first_name: str | None = Form(None),
-            last_name: str | None = Form(None),
-            gender: GenderEnum | None = Form(None),
-            date_of_birth: date | None = Form(None),
-            info: str | None = Form(None),
+        cls,
+        first_name: str | None = Form(None),
+        last_name: str | None = Form(None),
+        gender: GenderEnum | None = Form(None),
+        date_of_birth: date | None = Form(None),
+        info: str | None = Form(None),
     ):
         return cls(
             first_name=first_name,

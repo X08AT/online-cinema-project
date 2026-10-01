@@ -5,9 +5,9 @@ from app.models.user import GenderEnum
 
 @pytest.mark.asyncio
 async def test_create_profile_success(
-        client,
-        auth_headers,
-        monkeypatch,
+    client,
+    auth_headers,
+    monkeypatch,
 ):
     monkeypatch.setattr(
         "app.routers.user.profile.upload_avatar",
@@ -30,7 +30,7 @@ async def test_create_profile_success(
                 b"fake image content",
                 "image/jpeg",
             )
-        }
+        },
     )
 
     assert response.status_code == 201
@@ -40,9 +40,9 @@ async def test_create_profile_success(
 
 @pytest.mark.asyncio
 async def test_create_profile_already_exists(
-        client,
-        auth_headers,
-        monkeypatch,
+    client,
+    auth_headers,
+    monkeypatch,
 ):
     monkeypatch.setattr(
         "app.routers.user.profile.upload_avatar",
@@ -65,7 +65,7 @@ async def test_create_profile_already_exists(
                 b"fake image content",
                 "image/jpeg",
             )
-        }
+        },
     )
 
     assert response.status_code == 201
@@ -86,7 +86,7 @@ async def test_create_profile_already_exists(
                 b"fake image content",
                 "image/jpeg",
             )
-        }
+        },
     )
 
     assert response.status_code == 409
@@ -97,9 +97,9 @@ async def test_create_profile_already_exists(
 
 @pytest.mark.asyncio
 async def test_get_profile_success(
-        client,
-        profile,
-        auth_headers,
+    client,
+    profile,
+    auth_headers,
 ):
     response = await client.get(
         "/profile",
@@ -119,9 +119,7 @@ async def test_get_profile_not_found(client, auth_headers):
     )
 
     assert response.status_code == 404
-    assert response.json() == {
-        "detail": "Profile not found"
-    }
+    assert response.json() == {"detail": "Profile not found"}
 
 
 @pytest.mark.asyncio
@@ -132,7 +130,7 @@ async def test_update_profile_success(client, profile, auth_headers):
         data={
             "first_name": "NewTest",
             "info": "Updated Profile",
-        }
+        },
     )
 
     assert response.status_code == 200
@@ -148,22 +146,15 @@ async def test_update_profile_not_found(client, auth_headers):
         data={
             "first_name": "NewTest",
             "info": "Updated Profile",
-        }
+        },
     )
 
     assert response.status_code == 404
-    assert response.json() == {
-        "detail": "Profile not found"
-    }
+    assert response.json() == {"detail": "Profile not found"}
 
 
 @pytest.mark.asyncio
-async def test_update_profile_with_avatar(
-        client,
-        profile,
-        auth_headers,
-        monkeypatch
-):
+async def test_update_profile_with_avatar(client, profile, auth_headers, monkeypatch):
     monkeypatch.setattr(
         "app.routers.user.profile.upload_avatar",
         lambda avatar: "new-avatar.jpg",
@@ -178,7 +169,7 @@ async def test_update_profile_with_avatar(
                 b"fake image content",
                 "image/jpeg",
             )
-        }
+        },
     )
 
     assert response.status_code == 200

@@ -4,11 +4,7 @@ from decimal import Decimal
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy import NullPool, select, text
-from sqlalchemy.ext.asyncio import (
-    create_async_engine,
-    async_sessionmaker,
-    AsyncSession
-)
+from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 
 from app.core.security import hash_password, create_access_token
 from app.core.settings import settings
@@ -21,7 +17,9 @@ from app.models.movie import (
     Star,
     Certification,
     Movie,
-    MovieComment, Notification, NotificationTypeEnum
+    MovieComment,
+    Notification,
+    NotificationTypeEnum,
 )
 from app.models.user import (
     UserGroup,
@@ -29,13 +27,12 @@ from app.models.user import (
     User,
     ActivationToken,
     RefreshToken,
-    PasswordResetToken, UserProfile, GenderEnum,
+    PasswordResetToken,
+    UserProfile,
+    GenderEnum,
 )
 
-test_engine = create_async_engine(
-    settings.TEST_DATABASE_URL,
-    poolclass=NullPool
-)
+test_engine = create_async_engine(settings.TEST_DATABASE_URL, poolclass=NullPool)
 
 TestSessionLocal = async_sessionmaker(
     test_engine,
@@ -61,15 +58,11 @@ async def create_test_tables():
 
     async with test_engine.begin() as connection:
         table_names = ", ".join(
-            f'"{table.name}"'
-            for table in Base.metadata.sorted_tables
+            f'"{table.name}"' for table in Base.metadata.sorted_tables
         )
 
         await connection.execute(
-            text(
-                f"TRUNCATE TABLE {table_names} "
-                "RESTART IDENTITY CASCADE"
-            )
+            text(f"TRUNCATE TABLE {table_names} " "RESTART IDENTITY CASCADE")
         )
 
 
@@ -77,9 +70,7 @@ async def create_test_tables():
 async def user_group():
     async with TestSessionLocal() as session:
         result = await session.execute(
-            select(UserGroup).where(
-                UserGroup.name == UserGroupEnum.USER.value
-            )
+            select(UserGroup).where(UserGroup.name == UserGroupEnum.USER.value)
         )
         group = result.scalar_one_or_none()
 
@@ -259,9 +250,7 @@ async def inactive_user_password_reset_token(inactive_user):
 async def admin_group():
     async with TestSessionLocal() as session:
         result = await session.execute(
-            select(UserGroup).where(
-                UserGroup.name == UserGroupEnum.ADMIN.value
-            )
+            select(UserGroup).where(UserGroup.name == UserGroupEnum.ADMIN.value)
         )
         group = result.scalar_one_or_none()
 
@@ -477,9 +466,7 @@ async def movies(
 async def moderator_group():
     async with TestSessionLocal() as session:
         result = await session.execute(
-            select(UserGroup).where(
-                UserGroup.name == UserGroupEnum.MODERATOR.value
-            )
+            select(UserGroup).where(UserGroup.name == UserGroupEnum.MODERATOR.value)
         )
         group = result.scalar_one_or_none()
 
@@ -511,13 +498,9 @@ async def moderator_user(moderator_group):
 
 @pytest_asyncio.fixture
 async def moderator_auth_headers(moderator_user):
-    access_token = create_access_token(
-        {"sub": str(moderator_user.id)}
-    )
+    access_token = create_access_token({"sub": str(moderator_user.id)})
 
-    return {
-        "Authorization": f"Bearer {access_token}"
-    }
+    return {"Authorization": f"Bearer {access_token}"}
 
 
 @pytest_asyncio.fixture
@@ -555,13 +538,9 @@ async def second_active_user(user_group):
 
 @pytest_asyncio.fixture
 async def second_auth_headers(second_active_user):
-    token = create_access_token(
-        {"sub": str(second_active_user.id)}
-    )
+    token = create_access_token({"sub": str(second_active_user.id)})
 
-    return {
-        "Authorization": f"Bearer {token}"
-    }
+    return {"Authorization": f"Bearer {token}"}
 
 
 @pytest_asyncio.fixture

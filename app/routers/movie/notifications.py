@@ -14,13 +14,10 @@ router = APIRouter(tags=["Notifications"])
     status_code=200,
     response_model=list[NotificationResponseModel],
     summary="Get notifications",
-    description=(
-        "Returns all notifications for the currently authenticated user."
-    ),
+    description=("Returns all notifications for the currently authenticated user."),
 )
 async def notifications_list(
-        current_user: User = Depends(get_current_user),
-        db: AsyncSession = Depends(get_db)
+    current_user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)
 ):
     notifications = await get_notifications(current_user.id, db)
 
@@ -37,9 +34,9 @@ async def notifications_list(
     ),
 )
 async def notification_read(
-        notification_id: int,
-        current_user: User = Depends(get_current_user),
-        db: AsyncSession = Depends(get_db)
+    notification_id: int,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
 ):
     try:
         await read_notification(current_user.id, notification_id, db)

@@ -18,9 +18,7 @@ async def get_docs_user(
     credentials: HTTPBasicCredentials = Depends(security),
     db: AsyncSession = Depends(get_db),
 ):
-    result = await db.execute(
-        select(User).where(User.email == credentials.username)
-    )
+    result = await db.execute(select(User).where(User.email == credentials.username))
 
     user = result.scalar_one_or_none()
 

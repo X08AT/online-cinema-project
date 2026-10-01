@@ -14,9 +14,7 @@ async def test_rate_movie_success(
     )
 
     assert response.status_code == 200
-    assert response.json() == {
-        "message": "Movie rated successfully"
-    }
+    assert response.json() == {"message": "Movie rated successfully"}
 
 
 @pytest.mark.asyncio
@@ -122,9 +120,7 @@ async def test_update_movie_rating(
     )
 
     assert second_response.status_code == 200
-    assert second_response.json() == {
-        "message": "Movie rated successfully"
-    }
+    assert second_response.json() == {"message": "Movie rated successfully"}
 
 
 @pytest.mark.asyncio
@@ -183,9 +179,7 @@ async def test_get_movie_ratings_unauthorized(
     client,
     movie,
 ):
-    response = await client.get(
-        f"/movies/{movie.id}/ratings"
-    )
+    response = await client.get(f"/movies/{movie.id}/ratings")
 
     assert response.status_code == 401
 
@@ -244,8 +238,6 @@ async def test_delete_movie_rating_unauthorized(
     client,
     movie,
 ):
-    response = await client.delete(
-        f"/movies/{movie.id}/rating"
-    )
+    response = await client.delete(f"/movies/{movie.id}/rating")
 
     assert response.status_code == 401

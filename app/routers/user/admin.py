@@ -1,5 +1,6 @@
-from fastapi import APIRouter, HTTPException
-from fastapi.params import Depends
+from typing import Annotated
+
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -8,6 +9,9 @@ from app.models.user import User, UserGroup
 from app.schemas.user.admin import AdminChangeGroupModel
 
 router = APIRouter(tags=["Admin"])
+
+DbSession = Annotated[AsyncSession, Depends(get_db)]
+AdminUser = Annotated[User, Depends(require_admin)]
 
 
 @router.patch(
@@ -20,25 +24,32 @@ router = APIRouter(tags=["Admin"])
     ),
 )
 async def admin_update_group(
-        user_id: int,
-        data: AdminChangeGroupModel,
-        db: AsyncSession = Depends(get_db),
-        _admin: User = Depends(require_admin)
+    user_id: int,
+    data: AdminChangeGroupModel,
+    db: DbSession,
+    _admin: AdminUser,
 ):
-    result = await db.execute(select(User).where(User.id == user_id))
+    user_result = await db.execute(select(User).where(User.id == user_id))
 
-    user = result.scalar_one_or_none()
+    user = user_result.scalar_one_or_none()
 
     if user is None:
-        raise HTTPException(status_code=404, detail="User not found")
+        raise HTTPException(
+            status_code=404,
+            detail="User not found",
+        )
 
-    result = await db.execute(select(UserGroup)
-                              .where(UserGroup.name == data.user_group))
+    group_result = await db.execute(
+        select(UserGroup).where(UserGroup.name == data.user_group)
+    )
 
-    new_group = result.scalar_one_or_none()
+    new_group = group_result.scalar_one_or_none()
 
     if new_group is None:
-        raise HTTPException(status_code=404, detail="Group not found")
+        raise HTTPException(
+            status_code=404,
+            detail="Group not found",
+        )
 
     user.group_id = new_group.id
 
@@ -57,19 +68,25 @@ async def admin_update_group(
     ),
 )
 async def admin_activate_user(
-        user_id: int,
-        db: AsyncSession = Depends(get_db),
-        _admin: User = Depends(require_admin)
+    user_id: int,
+    db: DbSession,
+    _admin: AdminUser,
 ):
     result = await db.execute(select(User).where(User.id == user_id))
 
     user = result.scalar_one_or_none()
 
     if user is None:
-        raise HTTPException(status_code=404, detail="User not found")
+        raise HTTPException(
+            status_code=404,
+            detail="User not found",
+        )
 
     if user.is_active:
-        raise HTTPException(status_code=409, detail="User is already active")
+        raise HTTPException(
+            status_code=409,
+            detail="User is already active",
+        )
 
     user.is_active = True
 

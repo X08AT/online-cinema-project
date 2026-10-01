@@ -3,23 +3,16 @@ from typing import Literal
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.crud.movie.certification import (
-    get_certification_by_id,
-    get_certifications
-)
+from app.crud.movie.certification import get_certification_by_id, get_certifications
 from app.crud.movie.director import get_directors, get_director_by_id
 from app.crud.movie.genre import get_genres, get_genre_by_id
-from app.crud.movie.movie import (
-    get_movies_by_genre,
-    get_movies,
-    get_movie_by_id
-)
+from app.crud.movie.movie import get_movies_by_genre, get_movies, get_movie_by_id
 from app.crud.movie.star import get_stars, get_star_by_id
 from app.db.dependencies import get_db
 from app.schemas.movie.movie import (
     GenreWithCountResponseModel,
     NamedEntityResponseModel,
-    MovieResponseModel
+    MovieResponseModel,
 )
 
 router = APIRouter(tags=["Catalog"])
@@ -46,9 +39,7 @@ async def genres_list(db: AsyncSession = Depends(get_db)):
     status_code=200,
     response_model=NamedEntityResponseModel,
     summary="Get genre by ID",
-    description=(
-        "Returns a specific movie genre by its ID."
-    ),
+    description=("Returns a specific movie genre by its ID."),
 )
 async def genre_get_by_id(genre_id: int, db: AsyncSession = Depends(get_db)):
     genre = await get_genre_by_id(genre_id, db)
@@ -64,13 +55,9 @@ async def genre_get_by_id(genre_id: int, db: AsyncSession = Depends(get_db)):
     status_code=200,
     response_model=list[NamedEntityResponseModel],
     summary="Get stars",
-    description=(
-        "Returns a list of all available movie stars."
-    ),
+    description=("Returns a list of all available movie stars."),
 )
-async def stars_list(
-    db: AsyncSession = Depends(get_db)
-):
+async def stars_list(db: AsyncSession = Depends(get_db)):
     stars = await get_stars(db)
 
     return stars
@@ -81,21 +68,13 @@ async def stars_list(
     status_code=200,
     response_model=NamedEntityResponseModel,
     summary="Get star by ID",
-    description=(
-        "Returns a specific movie star by their ID."
-    ),
+    description=("Returns a specific movie star by their ID."),
 )
-async def star_get_by_id(
-    star_id: int,
-    db: AsyncSession = Depends(get_db)
-):
+async def star_get_by_id(star_id: int, db: AsyncSession = Depends(get_db)):
     star = await get_star_by_id(star_id, db)
 
     if star is None:
-        raise HTTPException(
-            status_code=404,
-            detail="Star not found"
-        )
+        raise HTTPException(status_code=404, detail="Star not found")
 
     return star
 
@@ -105,13 +84,9 @@ async def star_get_by_id(
     status_code=200,
     response_model=list[NamedEntityResponseModel],
     summary="Get directors",
-    description=(
-        "Returns a list of all available movie directors."
-    ),
+    description=("Returns a list of all available movie directors."),
 )
-async def directors_list(
-    db: AsyncSession = Depends(get_db)
-):
+async def directors_list(db: AsyncSession = Depends(get_db)):
     directors = await get_directors(db)
 
     return directors
@@ -122,21 +97,13 @@ async def directors_list(
     status_code=200,
     response_model=NamedEntityResponseModel,
     summary="Get director by ID",
-    description=(
-        "Returns a specific movie director by their ID."
-    ),
+    description=("Returns a specific movie director by their ID."),
 )
-async def director_get_by_id(
-    director_id: int,
-    db: AsyncSession = Depends(get_db)
-):
+async def director_get_by_id(director_id: int, db: AsyncSession = Depends(get_db)):
     director = await get_director_by_id(director_id, db)
 
     if director is None:
-        raise HTTPException(
-            status_code=404,
-            detail="Director not found"
-        )
+        raise HTTPException(status_code=404, detail="Director not found")
 
     return director
 
@@ -146,13 +113,9 @@ async def director_get_by_id(
     status_code=200,
     response_model=list[NamedEntityResponseModel],
     summary="Get certifications",
-    description=(
-        "Returns a list of all available movie certifications."
-    ),
+    description=("Returns a list of all available movie certifications."),
 )
-async def certifications_list(
-    db: AsyncSession = Depends(get_db)
-):
+async def certifications_list(db: AsyncSession = Depends(get_db)):
     certifications = await get_certifications(db)
 
     return certifications
@@ -163,24 +126,15 @@ async def certifications_list(
     status_code=200,
     response_model=NamedEntityResponseModel,
     summary="Get certification by ID",
-    description=(
-        "Returns a specific movie certification by its ID."
-    ),
+    description=("Returns a specific movie certification by its ID."),
 )
 async def certification_get_by_id(
-    certification_id: int,
-    db: AsyncSession = Depends(get_db)
+    certification_id: int, db: AsyncSession = Depends(get_db)
 ):
-    certification = await get_certification_by_id(
-        certification_id,
-        db
-    )
+    certification = await get_certification_by_id(certification_id, db)
 
     if certification is None:
-        raise HTTPException(
-            status_code=404,
-            detail="Certification not found"
-        )
+        raise HTTPException(status_code=404, detail="Certification not found")
 
     return certification
 
@@ -206,16 +160,7 @@ async def movies_list(
     sort_order: Literal["asc", "desc"] = Query(default="asc"),
     search: str | None = Query(default=None),
 ):
-    movies = await get_movies(
-        db,
-        skip,
-        limit,
-        year,
-        imdb,
-        sort_by,
-        sort_order,
-        search
-    )
+    movies = await get_movies(db, skip, limit, year, imdb, sort_by, sort_order, search)
 
     return movies
 
@@ -225,9 +170,7 @@ async def movies_list(
     status_code=200,
     response_model=MovieResponseModel,
     summary="Get movie by ID",
-    description=(
-        "Returns detailed information about a specific movie by its ID."
-    ),
+    description=("Returns detailed information about a specific movie by its ID."),
 )
 async def movie_get_by_id(movie_id: int, db: AsyncSession = Depends(get_db)):
     movie = await get_movie_by_id(movie_id, db)
@@ -243,14 +186,9 @@ async def movie_get_by_id(movie_id: int, db: AsyncSession = Depends(get_db)):
     status_code=200,
     response_model=list[MovieResponseModel],
     summary="Get movies by genre",
-    description=(
-        "Returns a list of movies associated with the specified genre."
-    ),
+    description=("Returns a list of movies associated with the specified genre."),
 )
-async def movie_list_by_genre(
-        genre_id: int,
-        db: AsyncSession = Depends(get_db)
-):
+async def movie_list_by_genre(genre_id: int, db: AsyncSession = Depends(get_db)):
     movies = await get_movies_by_genre(genre_id, db)
 
     return movies

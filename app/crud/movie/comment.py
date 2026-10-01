@@ -7,16 +7,16 @@ from app.models.movie import (
     Movie,
     CommentLike,
     Notification,
-    NotificationTypeEnum
+    NotificationTypeEnum,
 )
 from app.schemas.movie.comment import CommentCreateModel, CommentUpdateModel
 
 
 async def create_comment(
-        user_id: int,
-        movie_id: int,
-        data: CommentCreateModel,
-        db: AsyncSession
+    user_id: int,
+    movie_id: int,
+    data: CommentCreateModel,
+    db: AsyncSession,
 ) -> MovieComment:
     result = await db.execute(select(Movie).where(Movie.id == movie_id))
 
@@ -28,45 +28,48 @@ async def create_comment(
     comment = MovieComment(
         user_id=user_id,
         movie_id=movie_id,
-        **data.model_dump()
+        **data.model_dump(),
     )
+
     db.add(comment)
     await db.commit()
 
-    return await get_comment_by_id(comment.id, db)
+    created_comment = await get_comment_by_id(comment.id, db)
+
+    if created_comment is None:
+        raise ValueError("Comment not found after creation")
+
+    return created_comment
 
 
 async def get_comments_by_movie_id(
-        movie_id: int,
-        db: AsyncSession
+    movie_id: int,
+    db: AsyncSession,
 ) -> list[MovieComment]:
     result = await db.execute(
         select(MovieComment)
         .options(
             selectinload(MovieComment.likes),
-            selectinload(MovieComment.replies).selectinload(MovieComment.likes)
+            selectinload(MovieComment.replies).selectinload(MovieComment.likes),
         )
         .where(
             MovieComment.movie_id == movie_id,
-            MovieComment.parent_id.is_(None)
+            MovieComment.parent_id.is_(None),
         )
     )
 
     comments = result.scalars().all()
 
-    return comments
+    return list(comments)
 
 
 async def update_comment(
-        comment_id: int,
-        user_id: int,
-        data: CommentUpdateModel,
-        db: AsyncSession
+    comment_id: int,
+    user_id: int,
+    data: CommentUpdateModel,
+    db: AsyncSession,
 ) -> MovieComment:
-    result = await db.execute(
-        select(MovieComment)
-        .where(MovieComment.id == comment_id)
-    )
+    result = await db.execute(select(MovieComment).where(MovieComment.id == comment_id))
 
     comment = result.scalar_one_or_none()
 
@@ -80,18 +83,20 @@ async def update_comment(
 
     await db.commit()
 
-    return await get_comment_by_id(comment.id, db)
+    updated_comment = await get_comment_by_id(comment.id, db)
+
+    if updated_comment is None:
+        raise ValueError("Comment not found after update")
+
+    return updated_comment
 
 
 async def delete_comment(
-        comment_id: int,
-        user_id: int,
-        db: AsyncSession
+    comment_id: int,
+    user_id: int,
+    db: AsyncSession,
 ) -> None:
-    result = await db.execute(
-        select(MovieComment)
-        .where(MovieComment.id == comment_id)
-    )
+    result = await db.execute(select(MovieComment).where(MovieComment.id == comment_id))
 
     comment = result.scalar_one_or_none()
 
@@ -106,15 +111,12 @@ async def delete_comment(
 
 
 async def create_reply(
-        comment_id: int,
-        user_id: int,
-        data: CommentCreateModel,
-        db: AsyncSession
+    comment_id: int,
+    user_id: int,
+    data: CommentCreateModel,
+    db: AsyncSession,
 ) -> MovieComment:
-    result = await db.execute(
-        select(MovieComment)
-        .where(MovieComment.id == comment_id)
-    )
+    result = await db.execute(select(MovieComment).where(MovieComment.id == comment_id))
 
     comment = result.scalar_one_or_none()
 
@@ -125,7 +127,7 @@ async def create_reply(
         user_id=user_id,
         movie_id=comment.movie_id,
         parent_id=comment_id,
-        **data.model_dump()
+        **data.model_dump(),
     )
 
     db.add(reply)
@@ -141,18 +143,23 @@ async def create_reply(
 
     await db.commit()
 
-    return await get_comment_by_id(reply.id, db)
+    created_reply = await get_comment_by_id(reply.id, db)
+
+    if created_reply is None:
+        raise ValueError("Reply not found after creation")
+
+    return created_reply
 
 
 async def get_comment_by_id(
-        comment_id: int,
-        db: AsyncSession
+    comment_id: int,
+    db: AsyncSession,
 ) -> MovieComment | None:
     result = await db.execute(
         select(MovieComment)
         .options(
             selectinload(MovieComment.likes),
-            selectinload(MovieComment.replies).selectinload(MovieComment.likes)
+            selectinload(MovieComment.replies).selectinload(MovieComment.likes),
         )
         .where(MovieComment.id == comment_id)
     )
@@ -161,9 +168,9 @@ async def get_comment_by_id(
 
 
 async def like_comment(
-        comment_id: int,
-        user_id: int,
-        db: AsyncSession
+    comment_id: int,
+    user_id: int,
+    db: AsyncSession,
 ) -> None:
     comment = await get_comment_by_id(comment_id, db)
 
@@ -171,10 +178,10 @@ async def like_comment(
         raise ValueError("Comment not found")
 
     result = await db.execute(
-        select(CommentLike)
-        .where(
+        select(CommentLike).where(
             CommentLike.comment_id == comment_id,
-            CommentLike.user_id == user_id)
+            CommentLike.user_id == user_id,
+        )
     )
 
     comment_like = result.scalar_one_or_none()
@@ -202,15 +209,14 @@ async def like_comment(
 
 
 async def remove_like(
-        comment_id: int,
-        user_id: int,
-        db: AsyncSession
+    comment_id: int,
+    user_id: int,
+    db: AsyncSession,
 ) -> None:
     result = await db.execute(
-        select(CommentLike)
-        .where(
+        select(CommentLike).where(
             CommentLike.comment_id == comment_id,
-            CommentLike.user_id == user_id
+            CommentLike.user_id == user_id,
         )
     )
 

@@ -44,9 +44,7 @@ async def test_update_genre_not_found(
     )
 
     assert response.status_code == 404
-    assert response.json() == {
-        "detail": "Genre not found"
-    }
+    assert response.json() == {"detail": "Genre not found"}
 
 
 @pytest.mark.asyncio
@@ -61,9 +59,7 @@ async def test_delete_genre_success(
     )
 
     assert response.status_code == 200
-    assert response.json() == {
-        "message": "Genre deleted successfully"
-    }
+    assert response.json() == {"message": "Genre deleted successfully"}
 
 
 @pytest.mark.asyncio
@@ -77,9 +73,7 @@ async def test_delete_genre_not_found(
     )
 
     assert response.status_code == 404
-    assert response.json() == {
-        "detail": "Genre not found"
-    }
+    assert response.json() == {"detail": "Genre not found"}
 
 
 @pytest.mark.asyncio
@@ -139,9 +133,7 @@ async def test_update_star_not_found(
     )
 
     assert response.status_code == 404
-    assert response.json() == {
-        "detail": "Star not found"
-    }
+    assert response.json() == {"detail": "Star not found"}
 
 
 @pytest.mark.asyncio
@@ -156,9 +148,7 @@ async def test_delete_star_success(
     )
 
     assert response.status_code == 200
-    assert response.json() == {
-        "message": "Star deleted successfully"
-    }
+    assert response.json() == {"message": "Star deleted successfully"}
 
 
 @pytest.mark.asyncio
@@ -172,9 +162,7 @@ async def test_delete_star_not_found(
     )
 
     assert response.status_code == 404
-    assert response.json() == {
-        "detail": "Star not found"
-    }
+    assert response.json() == {"detail": "Star not found"}
 
 
 @pytest.mark.asyncio
@@ -220,9 +208,7 @@ async def test_update_director_not_found(
     )
 
     assert response.status_code == 404
-    assert response.json() == {
-        "detail": "Director not found"
-    }
+    assert response.json() == {"detail": "Director not found"}
 
 
 @pytest.mark.asyncio
@@ -237,9 +223,7 @@ async def test_delete_director_success(
     )
 
     assert response.status_code == 200
-    assert response.json() == {
-        "message": "Director deleted successfully"
-    }
+    assert response.json() == {"message": "Director deleted successfully"}
 
 
 @pytest.mark.asyncio
@@ -253,9 +237,7 @@ async def test_delete_director_not_found(
     )
 
     assert response.status_code == 404
-    assert response.json() == {
-        "detail": "Director not found"
-    }
+    assert response.json() == {"detail": "Director not found"}
 
 
 @pytest.mark.asyncio
@@ -301,9 +283,7 @@ async def test_update_certification_not_found(
     )
 
     assert response.status_code == 404
-    assert response.json() == {
-        "detail": "Certification not found"
-    }
+    assert response.json() == {"detail": "Certification not found"}
 
 
 @pytest.mark.asyncio
@@ -318,9 +298,7 @@ async def test_delete_certification_success(
     )
 
     assert response.status_code == 200
-    assert response.json() == {
-        "message": "Certification deleted successfully"
-    }
+    assert response.json() == {"message": "Certification deleted successfully"}
 
 
 @pytest.mark.asyncio
@@ -334,9 +312,7 @@ async def test_delete_certification_not_found(
     )
 
     assert response.status_code == 404
-    assert response.json() == {
-        "detail": "Certification not found"
-    }
+    assert response.json() == {"detail": "Certification not found"}
 
 
 @pytest.mark.asyncio
@@ -479,9 +455,7 @@ async def test_update_movie_not_found(
     )
 
     assert response.status_code == 404
-    assert response.json() == {
-        "detail": "Movie not found"
-    }
+    assert response.json() == {"detail": "Movie not found"}
 
 
 @pytest.mark.asyncio
@@ -496,9 +470,7 @@ async def test_delete_movie_success(
     )
 
     assert response.status_code == 200
-    assert response.json() == {
-        "message": "Movie deleted successfully"
-    }
+    assert response.json() == {"message": "Movie deleted successfully"}
 
 
 @pytest.mark.asyncio
@@ -512,9 +484,7 @@ async def test_delete_movie_not_found(
     )
 
     assert response.status_code == 404
-    assert response.json() == {
-        "detail": "Movie not found"
-    }
+    assert response.json() == {"detail": "Movie not found"}
 
 
 @pytest.mark.asyncio

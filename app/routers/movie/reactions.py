@@ -14,14 +14,13 @@ router = APIRouter(tags=["Reactions"])
     status_code=201,
     summary="Like movie",
     description=(
-        "Adds a like reaction from the authenticated user "
-        "to the specified movie."
+        "Adds a like reaction from the authenticated user " "to the specified movie."
     ),
 )
 async def like_movie(
-        movie_id: int,
-        current_user: User = Depends(get_current_user),
-        db: AsyncSession = Depends(get_db)
+    movie_id: int,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
 ):
     try:
         await set_movie_reaction(movie_id, ReactionEnum.LIKE, current_user, db)
@@ -36,22 +35,16 @@ async def like_movie(
     status_code=201,
     summary="Dislike movie",
     description=(
-        "Adds a dislike reaction from the authenticated user "
-        "to the specified movie."
+        "Adds a dislike reaction from the authenticated user " "to the specified movie."
     ),
 )
 async def dislike_movie(
-        movie_id: int,
-        current_user: User = Depends(get_current_user),
-        db: AsyncSession = Depends(get_db)
+    movie_id: int,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
 ):
     try:
-        await set_movie_reaction(
-            movie_id,
-            ReactionEnum.DISLIKE,
-            current_user,
-            db
-        )
+        await set_movie_reaction(movie_id, ReactionEnum.DISLIKE, current_user, db)
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
     return {"message": "Movie disliked successfully"}
@@ -67,9 +60,9 @@ async def dislike_movie(
     ),
 )
 async def delete_movie_reaction(
-        movie_id: int,
-        current_user: User = Depends(get_current_user),
-        db: AsyncSession = Depends(get_db)
+    movie_id: int,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
 ):
     try:
         deleted = await remove_movie_reaction(movie_id, current_user, db)
