@@ -7,6 +7,7 @@ class Settings(BaseSettings):
     SECRET_KEY: str
     ALGORITHM: str
     REDIS_URL: str
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 15
 
     MAIL_HOST: str
     MAIL_PORT: int

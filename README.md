@@ -127,17 +127,16 @@ Administrators have extended permissions for managing users and application data
 - Docker Compose
 - GitHub Actions
 - AWS EC2
-- AWS Elastic IP
 
 ---
 
 ## 🌐 Live Deployment
 
-The application is deployed on **AWS EC2** and is publicly available using a static Elastic IP.
+The application is deployed on **AWS EC2** and is publicly available.
 
-- **API:** http://51.20.154.208:8000
-- **Swagger UI:** http://51.20.154.208:8000/docs
-- **OpenAPI Schema:** http://51.20.154.208:8000/openapi.json
+- **API:** http://13.53.199.202:8000
+- **Swagger UI:** http://13.53.199.202:8000/docs
+- **OpenAPI Schema:** http://13.53.199.202:8000/openapi.json
 
 ### 🔑 Swagger Access
 
@@ -260,13 +259,13 @@ http://localhost:8000/openapi.json
 The deployed API documentation is available at:
 
 ```text
-http://51.20.154.208:8000/docs
+http://13.53.199.202:8000/docs
 ```
 
 OpenAPI schema:
 
 ```text
-http://51.20.154.208:8000/openapi.json
+http://13.53.199.202:8000/openapi.json
 ```
 
 Use one of the demo accounts above to authenticate and test the available endpoints.
@@ -366,7 +365,7 @@ Online Cinema API
 
 ## ☁️ AWS Deployment
 
-The application is deployed on an **AWS EC2 Ubuntu server** with a static Elastic IP.
+The application is deployed on an **AWS EC2 Ubuntu server.**
 
 Docker Compose manages the application services on the server.
 
@@ -487,4 +486,3 @@ The project demonstrates practical experience with:
 - Docker and Docker Compose
 - GitHub Actions CI/CD
 - AWS EC2 deployment
-- Elastic IP configuration
