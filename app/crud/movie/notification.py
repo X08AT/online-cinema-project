@@ -5,8 +5,8 @@ from app.models.movie import Notification
 
 
 async def get_notifications(
-        user_id: int,
-        db: AsyncSession
+    user_id: int,
+    db: AsyncSession,
 ) -> list[Notification]:
     result = await db.execute(
         select(Notification)
@@ -14,18 +14,15 @@ async def get_notifications(
         .order_by(Notification.created_at.desc())
     )
 
-    return result.scalars().all()
+    return list(result.scalars().all())
 
 
 async def read_notification(
-        user_id: int,
-        notification_id: int,
-        db: AsyncSession
+    user_id: int, notification_id: int, db: AsyncSession
 ) -> None:
     result = await db.execute(
         select(Notification).where(
-            Notification.id == notification_id,
-            Notification.user_id == user_id
+            Notification.id == notification_id, Notification.user_id == user_id
         )
     )
 

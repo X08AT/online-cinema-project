@@ -2,10 +2,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.movie import Star
-from app.schemas.movie.movie import (
-    NamedEntityCreateModel,
-    NamedEntityUpdateModel
-)
+from app.schemas.movie.movie import NamedEntityCreateModel, NamedEntityUpdateModel
 
 
 async def create_star(data: NamedEntityCreateModel, db: AsyncSession) -> Star:
@@ -21,9 +18,7 @@ async def create_star(data: NamedEntityCreateModel, db: AsyncSession) -> Star:
 async def get_stars(db: AsyncSession) -> list[Star]:
     result = await db.execute(select(Star))
 
-    stars = result.scalars().all()
-
-    return stars
+    return list(result.scalars().all())
 
 
 async def get_star_by_id(star_id: int, db: AsyncSession) -> Star | None:
@@ -35,9 +30,7 @@ async def get_star_by_id(star_id: int, db: AsyncSession) -> Star | None:
 
 
 async def update_star(
-        data: NamedEntityUpdateModel,
-        star_id: int,
-        db: AsyncSession
+    data: NamedEntityUpdateModel, star_id: int, db: AsyncSession
 ) -> Star | None:
     star = await get_star_by_id(star_id, db)
 

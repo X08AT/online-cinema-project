@@ -38,9 +38,7 @@ async def test_get_notifications_success(
 async def test_get_notifications_unauthorized(
     client,
 ):
-    response = await client.get(
-        "/notifications"
-    )
+    response = await client.get("/notifications")
 
     assert response.status_code == 401
 
@@ -57,9 +55,7 @@ async def test_read_notification_success(
     )
 
     assert response.status_code == 200
-    assert response.json() == {
-        "message": "Notification read successfully"
-    }
+    assert response.json() == {"message": "Notification read successfully"}
 
 
 @pytest.mark.asyncio
@@ -80,9 +76,7 @@ async def test_read_notification_unauthorized(
     client,
     notification,
 ):
-    response = await client.patch(
-        f"/notifications/{notification.id}"
-    )
+    response = await client.patch(f"/notifications/{notification.id}")
 
     assert response.status_code == 401
 

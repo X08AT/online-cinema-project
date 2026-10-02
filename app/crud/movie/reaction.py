@@ -6,35 +6,32 @@ from app.models.user import User
 
 
 async def set_movie_reaction(
-        movie_id: int,
-        reaction_type: ReactionEnum,
-        user: User,
-        db: AsyncSession
+    movie_id: int,
+    reaction_type: ReactionEnum,
+    user: User,
+    db: AsyncSession,
 ) -> None:
-    result = await db.execute(
-        select(Movie).where(Movie.id == movie_id)
-    )
+    movie_result = await db.execute(select(Movie).where(Movie.id == movie_id))
 
-    movie = result.scalar_one_or_none()
+    movie = movie_result.scalar_one_or_none()
 
     if movie is None:
         raise ValueError("Movie not found")
 
-    result = await db.execute(
-        select(MovieReaction)
-        .where(
+    reaction_result = await db.execute(
+        select(MovieReaction).where(
             MovieReaction.movie_id == movie_id,
-            MovieReaction.user_id == user.id
+            MovieReaction.user_id == user.id,
         )
     )
 
-    reaction = result.scalar_one_or_none()
+    reaction = reaction_result.scalar_one_or_none()
 
     if reaction is None:
         reaction = MovieReaction(
             movie_id=movie_id,
             user_id=user.id,
-            reaction=reaction_type
+            reaction=reaction_type,
         )
         db.add(reaction)
     else:
@@ -44,28 +41,25 @@ async def set_movie_reaction(
 
 
 async def remove_movie_reaction(
-        movie_id: int,
-        user: User,
-        db: AsyncSession
+    movie_id: int,
+    user: User,
+    db: AsyncSession,
 ) -> bool:
-    result = await db.execute(
-        select(Movie).where(Movie.id == movie_id)
-    )
+    movie_result = await db.execute(select(Movie).where(Movie.id == movie_id))
 
-    movie = result.scalar_one_or_none()
+    movie = movie_result.scalar_one_or_none()
 
     if movie is None:
         raise ValueError("Movie not found")
 
-    result = await db.execute(
-        select(MovieReaction)
-        .where(
+    reaction_result = await db.execute(
+        select(MovieReaction).where(
             MovieReaction.movie_id == movie_id,
-            MovieReaction.user_id == user.id
+            MovieReaction.user_id == user.id,
         )
     )
 
-    reaction = result.scalar_one_or_none()
+    reaction = reaction_result.scalar_one_or_none()
 
     if reaction is None:
         return False

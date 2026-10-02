@@ -4,13 +4,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.crud.movie.certification import (
     delete_certification,
     update_certification,
-    create_certification
+    create_certification,
 )
-from app.crud.movie.director import (
-    delete_director,
-    update_director,
-    create_director
-)
+from app.crud.movie.director import delete_director, update_director, create_director
 from app.crud.movie.genre import create_genre, update_genre, delete_genre
 from app.crud.movie.movie import delete_movie, update_movie, create_movie
 from app.crud.movie.star import update_star, delete_star, create_star
@@ -22,7 +18,7 @@ from app.schemas.movie.movie import (
     MovieCreateModel,
     NamedEntityUpdateModel,
     NamedEntityResponseModel,
-    NamedEntityCreateModel
+    NamedEntityCreateModel,
 )
 
 router = APIRouter(tags=["Management"])
@@ -34,14 +30,13 @@ router = APIRouter(tags=["Management"])
     response_model=NamedEntityResponseModel,
     summary="Create genre",
     description=(
-        "Creates a new movie genre. "
-        "This operation is available only to moderators."
+        "Creates a new movie genre. " "This operation is available only to moderators."
     ),
 )
 async def genre_create(
-        data: NamedEntityCreateModel,
-        db: AsyncSession = Depends(get_db),
-        _moderator: User = Depends(require_moderator)
+    data: NamedEntityCreateModel,
+    db: AsyncSession = Depends(get_db),
+    _moderator: User = Depends(require_moderator),
 ):
     genre = await create_genre(data, db)
 
@@ -59,10 +54,10 @@ async def genre_create(
     ),
 )
 async def genre_update(
-        data: NamedEntityUpdateModel,
-        genre_id: int,
-        db: AsyncSession = Depends(get_db),
-        _moderator: User = Depends(require_moderator)
+    data: NamedEntityUpdateModel,
+    genre_id: int,
+    db: AsyncSession = Depends(get_db),
+    _moderator: User = Depends(require_moderator),
 ):
     genre = await update_genre(data, genre_id, db)
 
@@ -82,9 +77,9 @@ async def genre_update(
     ),
 )
 async def genre_delete(
-        genre_id: int,
-        db: AsyncSession = Depends(get_db),
-        _moderator: User = Depends(require_moderator)
+    genre_id: int,
+    db: AsyncSession = Depends(get_db),
+    _moderator: User = Depends(require_moderator),
 ):
     deleted = await delete_genre(genre_id, db)
 
@@ -100,14 +95,13 @@ async def genre_delete(
     response_model=NamedEntityResponseModel,
     summary="Create star",
     description=(
-        "Creates a new movie star. "
-        "This operation is available only to moderators."
+        "Creates a new movie star. " "This operation is available only to moderators."
     ),
 )
 async def star_create(
     data: NamedEntityCreateModel,
     db: AsyncSession = Depends(get_db),
-    _moderator: User = Depends(require_moderator)
+    _moderator: User = Depends(require_moderator),
 ):
     star = await create_star(data, db)
 
@@ -128,15 +122,12 @@ async def star_update(
     data: NamedEntityUpdateModel,
     star_id: int,
     db: AsyncSession = Depends(get_db),
-    _moderator: User = Depends(require_moderator)
+    _moderator: User = Depends(require_moderator),
 ):
     star = await update_star(data, star_id, db)
 
     if star is None:
-        raise HTTPException(
-            status_code=404,
-            detail="Star not found"
-        )
+        raise HTTPException(status_code=404, detail="Star not found")
 
     return star
 
@@ -153,15 +144,12 @@ async def star_update(
 async def star_delete(
     star_id: int,
     db: AsyncSession = Depends(get_db),
-    _moderator: User = Depends(require_moderator)
+    _moderator: User = Depends(require_moderator),
 ):
     deleted = await delete_star(star_id, db)
 
     if not deleted:
-        raise HTTPException(
-            status_code=404,
-            detail="Star not found"
-        )
+        raise HTTPException(status_code=404, detail="Star not found")
 
     return {"message": "Star deleted successfully"}
 
@@ -179,7 +167,7 @@ async def star_delete(
 async def director_create(
     data: NamedEntityCreateModel,
     db: AsyncSession = Depends(get_db),
-    _moderator: User = Depends(require_moderator)
+    _moderator: User = Depends(require_moderator),
 ):
     director = await create_director(data, db)
 
@@ -200,19 +188,12 @@ async def director_update(
     data: NamedEntityUpdateModel,
     director_id: int,
     db: AsyncSession = Depends(get_db),
-    _moderator: User = Depends(require_moderator)
+    _moderator: User = Depends(require_moderator),
 ):
-    director = await update_director(
-        data,
-        director_id,
-        db
-    )
+    director = await update_director(data, director_id, db)
 
     if director is None:
-        raise HTTPException(
-            status_code=404,
-            detail="Director not found"
-        )
+        raise HTTPException(status_code=404, detail="Director not found")
 
     return director
 
@@ -229,18 +210,12 @@ async def director_update(
 async def director_delete(
     director_id: int,
     db: AsyncSession = Depends(get_db),
-    _moderator: User = Depends(require_moderator)
+    _moderator: User = Depends(require_moderator),
 ):
-    deleted = await delete_director(
-        director_id,
-        db
-    )
+    deleted = await delete_director(director_id, db)
 
     if not deleted:
-        raise HTTPException(
-            status_code=404,
-            detail="Director not found"
-        )
+        raise HTTPException(status_code=404, detail="Director not found")
 
     return {"message": "Director deleted successfully"}
 
@@ -258,12 +233,9 @@ async def director_delete(
 async def certification_create(
     data: NamedEntityCreateModel,
     db: AsyncSession = Depends(get_db),
-    _moderator: User = Depends(require_moderator)
+    _moderator: User = Depends(require_moderator),
 ):
-    certification = await create_certification(
-        data,
-        db
-    )
+    certification = await create_certification(data, db)
 
     return certification
 
@@ -282,19 +254,12 @@ async def certification_update(
     data: NamedEntityUpdateModel,
     certification_id: int,
     db: AsyncSession = Depends(get_db),
-    _moderator: User = Depends(require_moderator)
+    _moderator: User = Depends(require_moderator),
 ):
-    certification = await update_certification(
-        data,
-        certification_id,
-        db
-    )
+    certification = await update_certification(data, certification_id, db)
 
     if certification is None:
-        raise HTTPException(
-            status_code=404,
-            detail="Certification not found"
-        )
+        raise HTTPException(status_code=404, detail="Certification not found")
 
     return certification
 
@@ -311,22 +276,14 @@ async def certification_update(
 async def certification_delete(
     certification_id: int,
     db: AsyncSession = Depends(get_db),
-    _moderator: User = Depends(require_moderator)
+    _moderator: User = Depends(require_moderator),
 ):
-    deleted = await delete_certification(
-        certification_id,
-        db
-    )
+    deleted = await delete_certification(certification_id, db)
 
     if not deleted:
-        raise HTTPException(
-            status_code=404,
-            detail="Certification not found"
-        )
+        raise HTTPException(status_code=404, detail="Certification not found")
 
-    return {
-        "message": "Certification deleted successfully"
-    }
+    return {"message": "Certification deleted successfully"}
 
 
 @router.post(
@@ -340,9 +297,9 @@ async def certification_delete(
     ),
 )
 async def movie_create(
-        data: MovieCreateModel,
-        db: AsyncSession = Depends(get_db),
-        _moderator: User = Depends(require_moderator)
+    data: MovieCreateModel,
+    db: AsyncSession = Depends(get_db),
+    _moderator: User = Depends(require_moderator),
 ):
     try:
         movie = await create_movie(db, data)
@@ -363,10 +320,10 @@ async def movie_create(
     ),
 )
 async def movie_update(
-        movie_id: int,
-        data: MovieUpdateModel,
-        db: AsyncSession = Depends(get_db),
-        _moderator: User = Depends(require_moderator)
+    movie_id: int,
+    data: MovieUpdateModel,
+    db: AsyncSession = Depends(get_db),
+    _moderator: User = Depends(require_moderator),
 ):
     try:
         updated_movie = await update_movie(data, movie_id, db)
@@ -389,9 +346,9 @@ async def movie_update(
     ),
 )
 async def movie_delete(
-        movie_id: int,
-        db: AsyncSession = Depends(get_db),
-        _moderator: User = Depends(require_moderator)
+    movie_id: int,
+    db: AsyncSession = Depends(get_db),
+    _moderator: User = Depends(require_moderator),
 ):
     deleted = await delete_movie(movie_id, db)
 

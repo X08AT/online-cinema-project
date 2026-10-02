@@ -27,16 +27,17 @@ def test_verify_password_success():
 def test_verify_password_wrong_password():
     hashed = hash_password("Password123!")
 
-    assert verify_password(
-        "WrongPassword123!",
-        hashed,
-    ) is False
+    assert (
+        verify_password(
+            "WrongPassword123!",
+            hashed,
+        )
+        is False
+    )
 
 
 def test_create_access_token():
-    token = create_access_token(
-        {"sub": "123"}
-    )
+    token = create_access_token({"sub": "123"})
 
     payload = jwt.decode(
         token,

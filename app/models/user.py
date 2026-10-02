@@ -1,11 +1,21 @@
 from datetime import datetime, date, timezone
 from enum import Enum
-from typing import List, Optional
+from typing import List, Optional, TYPE_CHECKING
 
 from sqlalchemy import DateTime, ForeignKey, Enum as SQLEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.session import Base
+
+if TYPE_CHECKING:
+    from app.models.movie import (
+        CommentLike,
+        Favorite,
+        MovieComment,
+        MovieRating,
+        MovieReaction,
+        Notification,
+    )
 
 
 class GenderEnum(str, Enum):
@@ -45,10 +55,7 @@ class User(Base):
     )
     group_id: Mapped[int] = mapped_column(ForeignKey("user_groups.id"))
 
-    group: Mapped[UserGroup] = relationship(
-        "UserGroup",
-        back_populates="users"
-    )
+    group: Mapped[UserGroup] = relationship("UserGroup", back_populates="users")
     user_profile: Mapped["UserProfile"] = relationship(
         "UserProfile", back_populates="user"
     )
@@ -62,28 +69,22 @@ class User(Base):
         "RefreshToken", back_populates="user"
     )
     reactions: Mapped[List["MovieReaction"]] = relationship(
-        "MovieReaction",
-        back_populates="user"
+        "MovieReaction", back_populates="user"
     )
     comments: Mapped[List["MovieComment"]] = relationship(
-        "MovieComment",
-        back_populates="user"
+        "MovieComment", back_populates="user"
     )
     comment_likes: Mapped[List["CommentLike"]] = relationship(
-        "CommentLike",
-        back_populates="user"
+        "CommentLike", back_populates="user"
     )
     movies_ratings: Mapped[List["MovieRating"]] = relationship(
-        "MovieRating",
-        back_populates="user"
+        "MovieRating", back_populates="user"
     )
     notifications: Mapped[List["Notification"]] = relationship(
-        "Notification",
-        back_populates="user"
+        "Notification", back_populates="user"
     )
     favorites: Mapped[List["Favorite"]] = relationship(
-        "Favorite",
-        back_populates="user"
+        "Favorite", back_populates="user"
     )
 
 
@@ -110,10 +111,7 @@ class ActivationToken(Base):
     token: Mapped[str] = mapped_column(unique=True)
     expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
 
-    user: Mapped[User] = relationship(
-        "User",
-        back_populates="activation_token"
-    )
+    user: Mapped[User] = relationship("User", back_populates="activation_token")
 
 
 class PasswordResetToken(Base):
@@ -124,10 +122,7 @@ class PasswordResetToken(Base):
     token: Mapped[str] = mapped_column(unique=True)
     expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
 
-    user: Mapped[User] = relationship(
-        "User",
-        back_populates="password_reset_token"
-    )
+    user: Mapped[User] = relationship("User", back_populates="password_reset_token")
 
 
 class RefreshToken(Base):

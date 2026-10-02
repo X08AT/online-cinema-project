@@ -13,9 +13,7 @@ async def test_like_movie_success(
     )
 
     assert response.status_code == 201
-    assert response.json() == {
-        "message": "Movie liked successfully"
-    }
+    assert response.json() == {"message": "Movie liked successfully"}
 
 
 @pytest.mark.asyncio
@@ -36,9 +34,7 @@ async def test_like_movie_unauthorized(
     client,
     movie,
 ):
-    response = await client.post(
-        f"/movies/{movie.id}/like"
-    )
+    response = await client.post(f"/movies/{movie.id}/like")
 
     assert response.status_code == 401
 
@@ -55,9 +51,7 @@ async def test_dislike_movie_success(
     )
 
     assert response.status_code == 201
-    assert response.json() == {
-        "message": "Movie disliked successfully"
-    }
+    assert response.json() == {"message": "Movie disliked successfully"}
 
 
 @pytest.mark.asyncio
@@ -78,9 +72,7 @@ async def test_dislike_movie_unauthorized(
     client,
     movie,
 ):
-    response = await client.post(
-        f"/movies/{movie.id}/dislike"
-    )
+    response = await client.post(f"/movies/{movie.id}/dislike")
 
     assert response.status_code == 401
 
@@ -104,9 +96,7 @@ async def test_change_like_to_dislike(
     )
 
     assert dislike_response.status_code == 201
-    assert dislike_response.json() == {
-        "message": "Movie disliked successfully"
-    }
+    assert dislike_response.json() == {"message": "Movie disliked successfully"}
 
 
 @pytest.mark.asyncio
@@ -128,9 +118,7 @@ async def test_change_dislike_to_like(
     )
 
     assert like_response.status_code == 201
-    assert like_response.json() == {
-        "message": "Movie liked successfully"
-    }
+    assert like_response.json() == {"message": "Movie liked successfully"}
 
 
 @pytest.mark.asyncio
@@ -152,9 +140,7 @@ async def test_remove_like_success(
     )
 
     assert response.status_code == 200
-    assert response.json() == {
-        "message": "Movie reaction deleted successfully"
-    }
+    assert response.json() == {"message": "Movie reaction deleted successfully"}
 
 
 @pytest.mark.asyncio
@@ -176,9 +162,7 @@ async def test_remove_dislike_success(
     )
 
     assert response.status_code == 200
-    assert response.json() == {
-        "message": "Movie reaction deleted successfully"
-    }
+    assert response.json() == {"message": "Movie reaction deleted successfully"}
 
 
 @pytest.mark.asyncio
@@ -193,9 +177,7 @@ async def test_remove_reaction_not_found(
     )
 
     assert response.status_code == 404
-    assert response.json() == {
-        "detail": "Movie reaction not found"
-    }
+    assert response.json() == {"detail": "Movie reaction not found"}
 
 
 @pytest.mark.asyncio
@@ -216,8 +198,6 @@ async def test_remove_reaction_unauthorized(
     client,
     movie,
 ):
-    response = await client.delete(
-        f"/movies/{movie.id}/reaction"
-    )
+    response = await client.delete(f"/movies/{movie.id}/reaction")
 
     assert response.status_code == 401

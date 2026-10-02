@@ -3,7 +3,6 @@ from celery.schedules import crontab
 
 from app.core.settings import settings
 
-
 celery_app = Celery(
     "online_cinema",
     broker=settings.REDIS_URL,

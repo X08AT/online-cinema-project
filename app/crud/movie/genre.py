@@ -2,16 +2,10 @@ from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.movie import Genre, MovieGenre
-from app.schemas.movie.movie import (
-    NamedEntityCreateModel,
-    NamedEntityUpdateModel
-)
+from app.schemas.movie.movie import NamedEntityCreateModel, NamedEntityUpdateModel
 
 
-async def create_genre(
-        data: NamedEntityCreateModel,
-        db: AsyncSession
-) -> Genre:
+async def create_genre(data: NamedEntityCreateModel, db: AsyncSession) -> Genre:
     genre = Genre(**data.model_dump())
 
     db.add(genre)
@@ -23,23 +17,17 @@ async def create_genre(
 
 async def get_genres(db: AsyncSession) -> list[dict]:
     result = await db.execute(
-        select(
-            Genre,
-            func.count(MovieGenre.movie_id)
-            .label("movie_count"))
+        select(Genre, func.count(MovieGenre.movie_id).label("movie_count"))
         .outerjoin(MovieGenre, Genre.id == MovieGenre.genre_id)
-        .group_by(Genre.id))
+        .group_by(Genre.id)
+    )
 
     rows = result.all()
 
     genres = []
 
     for genre, movie_count in rows:
-        genres.append({
-            "id": genre.id,
-            "name": genre.name,
-            "movie_count": movie_count
-        })
+        genres.append({"id": genre.id, "name": genre.name, "movie_count": movie_count})
 
     return genres
 
@@ -53,9 +41,7 @@ async def get_genre_by_id(genre_id: int, db: AsyncSession) -> Genre | None:
 
 
 async def update_genre(
-        data: NamedEntityUpdateModel,
-        genre_id: int,
-        db: AsyncSession
+    data: NamedEntityUpdateModel, genre_id: int, db: AsyncSession
 ) -> Genre | None:
     genre = await get_genre_by_id(genre_id, db)
 

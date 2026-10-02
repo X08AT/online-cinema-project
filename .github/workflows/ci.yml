@@ -1,0 +1,94 @@
+name: CI/CD
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  code-quality-and-tests:
+    runs-on: ubuntu-latest
+
+    env:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: db
+
+      DATABASE_URL: postgresql+asyncpg://user:password@localhost:5433/db
+      TEST_DATABASE_URL: postgresql+asyncpg://user:password@localhost:5434/test_db
+
+      SECRET_KEY: test-secret-key
+      ALGORITHM: HS256
+
+      REDIS_URL: redis://localhost:6379
+
+      MAIL_HOST: localhost
+      MAIL_PORT: 1025
+      MAIL_FROM: noreply@online-cinema.local
+
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin123
+      MINIO_ENDPOINT: localhost:9000
+      MINIO_BUCKET: avatars
+
+      DEFAULT_USER_EMAIL: user@example.com
+      DEFAULT_USER_PASSWORD: User1234
+
+      DEFAULT_MODERATOR_EMAIL: moderator@example.com
+      DEFAULT_MODERATOR_PASSWORD: Moderator123
+
+      DEFAULT_ADMIN_EMAIL: admin@example.com
+      DEFAULT_ADMIN_PASSWORD: Admin1234
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+
+      - name: Install Poetry
+        run: pipx install poetry
+
+      - name: Install dependencies
+        run: poetry install --no-interaction
+
+      - name: Check formatting with Black
+        run: poetry run black --check .
+
+      - name: Run Flake8
+        run: poetry run flake8 .
+
+      - name: Run mypy
+        run: poetry run mypy app
+
+      - name: Start test database
+        run: docker compose up -d test_db
+
+      - name: Run tests with coverage
+        run: >
+          poetry run pytest
+          --cov=app
+          --cov-report=term-missing
+          --cov-fail-under=90
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: code-quality-and-tests
+
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd /home/ubuntu/online-cinema-project
+            git fetch origin
+            git switch main
+            git pull origin main
+            docker compose up --build -d

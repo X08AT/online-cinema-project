@@ -57,9 +57,7 @@ async def test_add_movie_to_favorites_unauthorized(
     client,
     movie,
 ):
-    response = await client.post(
-        f"/movies/{movie.id}/favorite"
-    )
+    response = await client.post(f"/movies/{movie.id}/favorite")
 
     assert response.status_code == 401
 
@@ -109,9 +107,7 @@ async def test_get_favorites_success(
 async def test_get_favorites_unauthorized(
     client,
 ):
-    response = await client.get(
-        "/movies/favorites"
-    )
+    response = await client.get("/movies/favorites")
 
     assert response.status_code == 401
 
@@ -314,10 +310,7 @@ async def test_search_favorites(
 
     assert response.status_code == 200
 
-    names = [
-        movie["name"]
-        for movie in response.json()
-    ]
+    names = [movie["name"] for movie in response.json()]
 
     assert expected_movie in names
 
@@ -403,8 +396,6 @@ async def test_remove_favorite_unauthorized(
     client,
     movie,
 ):
-    response = await client.delete(
-        f"/movies/{movie.id}/favorite"
-    )
+    response = await client.delete(f"/movies/{movie.id}/favorite")
 
     assert response.status_code == 401

@@ -1,38 +1,35 @@
-from sqlalchemy import select, or_
+from sqlalchemy import or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from app.models.movie import Movie, Favorite, Star, Director
+from app.models.movie import Director, Favorite, Movie, Star
 
 
 async def favorite_movie_by_id(
-        user_id: int,
-        movie_id: int,
-        db: AsyncSession
+    user_id: int,
+    movie_id: int,
+    db: AsyncSession,
 ) -> Favorite:
-    result = await db.execute(select(Movie).filter(Movie.id == movie_id))
-
-    movie = result.scalar_one_or_none()
+    movie_result = await db.execute(select(Movie).where(Movie.id == movie_id))
+    movie = movie_result.scalar_one_or_none()
 
     if movie is None:
         raise ValueError("Movie not found")
 
-    result = await db.execute(
-        select(Favorite)
-        .where(
+    favorite_result = await db.execute(
+        select(Favorite).where(
             Favorite.movie_id == movie_id,
-            Favorite.user_id == user_id
+            Favorite.user_id == user_id,
         )
     )
-
-    favorite = result.scalar_one_or_none()
+    favorite = favorite_result.scalar_one_or_none()
 
     if favorite is not None:
         raise FileExistsError("Movie already favorited")
 
     favorite = Favorite(
         movie_id=movie_id,
-        user_id=user_id
+        user_id=user_id,
     )
 
     db.add(favorite)
@@ -44,28 +41,23 @@ async def favorite_movie_by_id(
 
 
 async def remove_movie_from_favorite(
-        movie_id: int,
-        user_id: int,
-        db: AsyncSession
+    movie_id: int,
+    user_id: int,
+    db: AsyncSession,
 ) -> None:
-    result = await db.execute(
-        select(Movie).where(Movie.id == movie_id)
-    )
-
-    movie = result.scalar_one_or_none()
+    movie_result = await db.execute(select(Movie).where(Movie.id == movie_id))
+    movie = movie_result.scalar_one_or_none()
 
     if movie is None:
         raise ValueError("Movie not found")
 
-    result = await db.execute(
-        select(Favorite)
-        .where(
+    favorite_result = await db.execute(
+        select(Favorite).where(
             Favorite.movie_id == movie_id,
-            Favorite.user_id == user_id
+            Favorite.user_id == user_id,
         )
     )
-
-    favorite = result.scalar_one_or_none()
+    favorite = favorite_result.scalar_one_or_none()
 
     if favorite is None:
         raise ValueError("Favorite not found")
@@ -75,15 +67,15 @@ async def remove_movie_from_favorite(
 
 
 async def favorite_movies_list(
-        user_id: int,
-        db: AsyncSession,
-        skip: int,
-        limit: int,
-        year: int | None = None,
-        imdb: float | None = None,
-        sort_by: str | None = None,
-        sort_order: str = "asc",
-        search: str | None = None
+    user_id: int,
+    db: AsyncSession,
+    skip: int,
+    limit: int,
+    year: int | None = None,
+    imdb: float | None = None,
+    sort_by: str | None = None,
+    sort_order: str = "asc",
+    search: str | None = None,
 ) -> list[Movie]:
     query = (
         select(Movie)
@@ -95,7 +87,8 @@ async def favorite_movies_list(
             selectinload(Movie.reactions),
         )
         .join(Favorite)
-        .where(Favorite.user_id == user_id))
+        .where(Favorite.user_id == user_id)
+    )
 
     if year is not None:
         query = query.where(Movie.year == year)
@@ -109,7 +102,7 @@ async def favorite_movies_list(
         "votes": Movie.votes,
     }
 
-    sort_column = sort_fields.get(sort_by)
+    sort_column = sort_fields.get(sort_by) if sort_by is not None else None
 
     if sort_column is not None:
         if sort_order == "desc":
@@ -130,7 +123,6 @@ async def favorite_movies_list(
     query = query.offset(skip).limit(limit)
 
     result = await db.execute(query)
-
     movies = result.scalars().all()
 
-    return movies
+    return list(movies)

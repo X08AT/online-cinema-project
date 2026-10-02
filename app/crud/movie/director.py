@@ -2,15 +2,12 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.movie import Director
-from app.schemas.movie.movie import (
-    NamedEntityCreateModel,
-    NamedEntityUpdateModel
-)
+from app.schemas.movie.movie import NamedEntityCreateModel, NamedEntityUpdateModel
 
 
 async def create_director(
     data: NamedEntityCreateModel,
-    db: AsyncSession
+    db: AsyncSession,
 ) -> Director:
     director = Director(**data.model_dump())
 
@@ -26,16 +23,14 @@ async def get_directors(db: AsyncSession) -> list[Director]:
 
     directors = result.scalars().all()
 
-    return directors
+    return list(directors)
 
 
 async def get_director_by_id(
     director_id: int,
-    db: AsyncSession
+    db: AsyncSession,
 ) -> Director | None:
-    result = await db.execute(
-        select(Director).where(Director.id == director_id)
-    )
+    result = await db.execute(select(Director).where(Director.id == director_id))
 
     director = result.scalar_one_or_none()
 
@@ -45,7 +40,7 @@ async def get_director_by_id(
 async def update_director(
     data: NamedEntityUpdateModel,
     director_id: int,
-    db: AsyncSession
+    db: AsyncSession,
 ) -> Director | None:
     director = await get_director_by_id(director_id, db)
 
@@ -62,7 +57,7 @@ async def update_director(
 
 async def delete_director(
     director_id: int,
-    db: AsyncSession
+    db: AsyncSession,
 ) -> bool:
     director = await get_director_by_id(director_id, db)
 

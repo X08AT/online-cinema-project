@@ -6,8 +6,7 @@ from app.schemas.user.profile import ProfileCreateModel, ProfileUpdateModel
 
 
 async def get_profile_by_user_id(user_id: int, db: AsyncSession):
-    result = await db.execute(select(UserProfile)
-                              .where(UserProfile.user_id == user_id))
+    result = await db.execute(select(UserProfile).where(UserProfile.user_id == user_id))
 
     profile = result.scalar_one_or_none()
 
@@ -15,10 +14,7 @@ async def get_profile_by_user_id(user_id: int, db: AsyncSession):
 
 
 async def create_profile(
-        user_id: int,
-        db: AsyncSession,
-        data: ProfileCreateModel,
-        avatar: str
+    user_id: int, db: AsyncSession, data: ProfileCreateModel, avatar: str
 ):
     profile = UserProfile(
         user_id=user_id,
@@ -35,10 +31,10 @@ async def create_profile(
 
 
 async def update_profile(
-        user_id: int,
-        db: AsyncSession,
-        data: ProfileUpdateModel,
-        avatar: str | None = None,
+    user_id: int,
+    db: AsyncSession,
+    data: ProfileUpdateModel,
+    avatar: str | None = None,
 ):
     profile = await get_profile_by_user_id(user_id, db)
 

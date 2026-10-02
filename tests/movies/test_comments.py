@@ -50,9 +50,7 @@ async def test_get_movie_comments_success(
     movie,
     comment,
 ):
-    response = await client.get(
-        f"/movies/{movie.id}/comments"
-    )
+    response = await client.get(f"/movies/{movie.id}/comments")
 
     assert response.status_code == 200
 
@@ -67,9 +65,7 @@ async def test_get_movie_comments_empty(
     client,
     movie,
 ):
-    response = await client.get(
-        f"/movies/{movie.id}/comments"
-    )
+    response = await client.get(f"/movies/{movie.id}/comments")
 
     assert response.status_code == 200
     assert response.json() == []
@@ -132,9 +128,7 @@ async def test_delete_comment_success(
     )
 
     assert response.status_code == 200
-    assert response.json() == {
-        "message": "Comment deleted successfully"
-    }
+    assert response.json() == {"message": "Comment deleted successfully"}
 
 
 @pytest.mark.asyncio
@@ -206,9 +200,7 @@ async def test_like_comment_success(
     )
 
     assert response.status_code == 201
-    assert response.json() == {
-        "message": "Comment liked successfully"
-    }
+    assert response.json() == {"message": "Comment liked successfully"}
 
 
 @pytest.mark.asyncio
