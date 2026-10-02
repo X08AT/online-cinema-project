@@ -56,7 +56,7 @@ services:
       - redis_data:/data
 
   minio:
-    image: quay.io/minio/minio
+    image: quay.io/minio/aistor/minio:latest
     env_file:
       - .env
     ports:
