@@ -160,6 +160,7 @@ Additional demo accounts with different roles are available in the **Demo Accoun
 ```bash
 git clone https://github.com/X08AT/online-cinema-project.git
 cd online-cinema-project
+poetry install
 ```
 
 ### 2. Configure Environment Variables
